@@ -1,4 +1,4 @@
-module App (app, CanvasAppType) where
+module App (app, CanvasApp) where
 
 import Prelude
 
@@ -13,10 +13,10 @@ import Halogen.HTML.Properties as HP
 import Model (Interval, KeyData, MouseData)
 
 
-type CanvasAppType = H.Component HH.HTML (Const Void) Unit Void Aff
+type CanvasApp = H.Component HH.HTML (Const Void) Unit Void Aff
 
 
-type CanvasApp state =
+type CanvasAppSpec state =
     { initialState :: state
     , tick :: Interval -> state -> state
     , handleKeyboard :: KeyData -> state -> state
@@ -36,7 +36,7 @@ view =
 
 
 update :: forall state.
-          CanvasApp state
+          CanvasAppSpec state
        -> Msg
        -> H.HalogenM state Msg () Void Aff Unit
 update appSpec =
@@ -53,7 +53,7 @@ update appSpec =
 
 
 app :: forall state.
-        CanvasApp state
+        CanvasAppSpec state
      -> H.Component HH.HTML (Const Void) Unit Void Aff
 app appSpec =
     H.mkComponent

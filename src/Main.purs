@@ -6,9 +6,10 @@ import Effect (Effect)
 import Halogen.Aff as HA
 import Halogen.VDom.Driver (runUI)
 
-import RandomWalker as RandomWalker
+-- Import a specific app here as ActiveApp to run this app.
+import Apps.RandomWalker as ActiveApp
 
 main :: Effect Unit
 main = HA.runHalogenAff do
   body <- HA.awaitBody
-  runUI RandomWalker.app unit body
+  runUI ActiveApp.app unit body
