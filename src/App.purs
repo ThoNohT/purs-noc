@@ -33,10 +33,8 @@ defaultAppSpec initialState =
   , tick: \_ s -> s
   , handleKeyboard: \_ s -> s
   , handleMouse: \_ s -> s
-  , render: ignore
+  , render: const (pure unit)
   }
-
-foreign import ignore :: forall a. a -> Effect Unit
 
 view :: H.ComponentHTML Msg () Aff
 view = HH.canvas [ HP.id_ "render-canvas", HP.width 800, HP.height 600 ]
