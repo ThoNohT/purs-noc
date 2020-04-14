@@ -8,7 +8,7 @@ data KeyEvent
   | KeyDown
 
 type KeyData
-  = { event :: KeyEvent, keyCode :: Int }
+  = { event :: KeyEvent, keyCode :: String }
 
 data MouseEvent
   = MouseMove
