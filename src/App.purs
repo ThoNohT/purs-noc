@@ -1,23 +1,27 @@
 module App (CanvasApp, app, defaultAppSpec) where
 
 import Prelude
-
 import Control.Monad.State as HS
 import Data.Const (Const)
-import Data.Maybe (Maybe(..))
+import Data.Int.Bits ((.&.))
+import Data.Maybe (Maybe(..), fromJust)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Halogen.Query.EventSource as ES
-import Model (Interval, KeyData, KeyEvent(..), MouseData)
+import Model (Interval, KeyData, KeyEvent(..), MouseButton(..), MouseData, MouseEvent(..))
+import Partial.Unsafe (unsafePartial)
+import Web.DOM.Element as E
+import Web.DOM.NonElementParentNode as NEPN
 import Web.HTML (window) as Web
 import Web.HTML.HTMLDocument as HTMLDocument
 import Web.HTML.Window (document) as Web
-import Web.UIEvent.KeyboardEvent (KeyboardEvent)
 import Web.UIEvent.KeyboardEvent as KE
 import Web.UIEvent.KeyboardEvent.EventTypes as KET
+import Web.UIEvent.MouseEvent as ME
+import Web.UIEvent.MouseEvent.EventTypes as MET
 
 type CanvasApp
   = H.Component HH.HTML (Const Void) Unit Void Aff
@@ -49,11 +53,29 @@ defaultAppSpec initialState =
 view :: H.ComponentHTML Msg () Aff
 view = HH.canvas [ HP.id_ "render-canvas", HP.width 800, HP.height 600 ]
 
-
-toKeyData :: KeyEvent -> KeyboardEvent -> KeyData
+toKeyData :: KeyEvent -> KE.KeyboardEvent -> KeyData
 toKeyData eventType event =
+  { event: eventType
+  , keyCode: KE.code event
+  }
+
+toMouseData :: MouseEvent -> ME.MouseEvent -> MouseData
+toMouseData eventType event =
+  let
+    buttonInt = ME.buttons event
+
+    button =
+      if buttonInt .&. 1 > 0 then
+        LeftButton
+      else
+        if buttonInt .&. 2 > 0 then
+          RightButton
+        else
+          None
+  in
     { event: eventType
-    , keyCode: KE.code event
+    , button: button
+    , location: { x: ME.clientX event, y: ME.clientY event }
     }
 
 update ::
@@ -64,27 +86,37 @@ update ::
 update appSpec = case _ of
   Init -> do
     document <- H.liftEffect $ Web.document =<< Web.window
+    element <- H.liftEffect $ NEPN.getElementById "render-canvas" $ HTMLDocument.toNonElementParentNode document
+    let
+      element' = unsafePartial fromJust element
     H.subscribe' \_ ->
       ES.eventListenerEventSource
         KET.keyup
-        (HTMLDocument.toEventTarget document)
+        (E.toEventTarget element')
         (map (toKeyData KeyUp >>> Keyboard) <<< KE.fromEvent)
-
     H.subscribe' \_ ->
       ES.eventListenerEventSource
         KET.keydown
-        (HTMLDocument.toEventTarget document)
+        (E.toEventTarget element')
         (map (toKeyData KeyDown >>> Keyboard) <<< KE.fromEvent)
-
-  Tick interval ->
-    HS.modify_ (appSpec.tick interval)
-
-  Keyboard kbData ->
-     HS.modify_ (appSpec.handleKeyboard kbData)
-
-  Mouse mouseData ->
-    HS.modify_ (appSpec.handleMouse mouseData)
-
+    H.subscribe' \_ ->
+      ES.eventListenerEventSource
+        MET.mousemove
+        (E.toEventTarget element')
+        (map (toMouseData MouseMove >>> Mouse) <<< ME.fromEvent)
+    H.subscribe' \_ ->
+      ES.eventListenerEventSource
+        MET.mousedown
+        (E.toEventTarget element')
+        (map (toMouseData MouseDown >>> Mouse) <<< ME.fromEvent)
+    H.subscribe' \_ ->
+      ES.eventListenerEventSource
+        MET.mouseup
+        (E.toEventTarget element')
+        (map (toMouseData MouseUp >>> Mouse) <<< ME.fromEvent)
+  Tick interval -> HS.modify_ (appSpec.tick interval)
+  Keyboard kbData -> HS.modify_ (appSpec.handleKeyboard kbData)
+  Mouse mouseData -> HS.modify_ (appSpec.handleMouse mouseData)
   Render -> do
     currentState <- HS.get
     H.liftEffect (appSpec.render currentState)

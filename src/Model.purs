@@ -8,7 +8,9 @@ data KeyEvent
   | KeyDown
 
 type KeyData
-  = { event :: KeyEvent, keyCode :: String }
+  = { event :: KeyEvent
+    , keyCode :: String
+    }
 
 data MouseEvent
   = MouseMove
@@ -18,9 +20,13 @@ data MouseEvent
 data MouseButton
   = LeftButton
   | RightButton
+  | None
 
 type Point
   = { x :: Int, y :: Int }
 
 type MouseData
-  = { event :: MouseEvent, button :: MouseButton, location :: Point }
+  = { event :: MouseEvent
+    , button :: MouseButton
+    , location :: Point
+    }
