@@ -1,11 +1,10 @@
 module App (CanvasApp, app, defaultAppSpec) where
 
 import Prelude
-
 import Control.Monad.State as HS
 import Data.Const (Const)
 import Data.Int.Bits ((.&.))
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromJust)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Halogen as H
@@ -13,6 +12,12 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Model (Interval, KeyData, KeyEvent(..), MouseButton(..), MouseData, MouseEvent(..))
+import Partial.Unsafe (unsafePartial)
+import Web.DOM.NonElementParentNode as NEPN
+import Web.HTML (window) as Web
+import Web.HTML.HTMLDocument as HTMLDocument
+import Web.HTML.HTMLElement as HTMLElement
+import Web.HTML.Window (document) as Web
 import Web.UIEvent.KeyboardEvent as KE
 import Web.UIEvent.MouseEvent as ME
 
@@ -28,7 +33,8 @@ type CanvasAppSpec state
     }
 
 data Msg
-  = Tick Interval
+  = Init
+  | Tick Interval
   | Keyboard KeyData
   | Mouse MouseData
   | Render
@@ -43,16 +49,18 @@ defaultAppSpec initialState =
   }
 
 view :: H.ComponentHTML Msg () Aff
-view = HH.canvas
+view =
+  HH.canvas
     [ HP.id_ "render-canvas"
-        , HP.width 800
-        , HP.height 600
-        , HE.onMouseMove (toMouseData MouseMove >>> Mouse >>> Just)
-        , HE.onMouseDown (toMouseData MouseDown >>> Mouse >>> Just)
-        , HE.onMouseUp (toMouseData MouseUp >>> Mouse >>> Just)
-        , HE.onKeyDown (toKeyData KeyDown >>> Keyboard >>> Just)
-        , HE.onKeyUp (toKeyData KeyUp >>> Keyboard >>> Just)
-        ]
+    , HP.width 800
+    , HP.height 600
+    , HP.tabIndex 0
+    , HE.onMouseMove (toMouseData MouseMove >>> Mouse >>> Just)
+    , HE.onMouseDown (toMouseData MouseDown >>> Mouse >>> Just)
+    , HE.onMouseUp (toMouseData MouseUp >>> Mouse >>> Just)
+    , HE.onKeyDown (toKeyData KeyDown >>> Keyboard >>> Just)
+    , HE.onKeyUp (toKeyData KeyUp >>> Keyboard >>> Just)
+    ]
 
 toKeyData :: KeyEvent -> KE.KeyboardEvent -> KeyData
 toKeyData eventType event =
@@ -85,6 +93,13 @@ update ::
   Msg ->
   H.HalogenM state Msg () Void Aff Unit
 update appSpec = case _ of
+  Init -> do
+    -- Set focus to the canvas.
+    document <- H.liftEffect $ Web.document =<< Web.window
+    element <- H.liftEffect $ NEPN.getElementById "render-canvas" $ HTMLDocument.toNonElementParentNode document
+    let
+      element' = unsafePartial fromJust (element >>= HTMLElement.fromElement)
+    H.liftEffect $ HTMLElement.focus element'
   Tick interval -> HS.modify_ (appSpec.tick interval)
   Keyboard kbData -> HS.modify_ (appSpec.handleKeyboard kbData)
   Mouse mouseData -> HS.modify_ (appSpec.handleMouse mouseData)
@@ -100,5 +115,5 @@ app appSpec =
   H.mkComponent
     { initialState: const appSpec.initialState
     , render: const view
-    , eval: H.mkEval $ H.defaultEval { handleAction = update appSpec }
+    , eval: H.mkEval $ H.defaultEval { handleAction = update appSpec, initialize = Just Init }
     }
