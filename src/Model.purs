@@ -1,26 +1,26 @@
 module Model where
 
+type Interval
+  = { milliseconds :: Int }
 
-type Interval = { milliseconds :: Int }
+data KeyEvent
+  = KeyUp
+  | KeyDown
 
+type KeyData
+  = { event :: KeyEvent, keyCode :: Int }
 
-data KeyEvent = KeyUp
-              | KeyDown
+data MouseEvent
+  = MouseMove
+  | MouseDown
+  | MouseUp
 
+data MouseButton
+  = LeftButton
+  | RightButton
 
-type KeyData = { event:: KeyEvent, keyCode :: Int }
+type Point
+  = { x :: Int, y :: Int }
 
-
-data MouseEvent = MouseMove
-                | MouseDown
-                | MouseUp
-
-
-data MouseButton = LeftButton
-                 | RightButton
-
-
-type Point = { x :: Int, y :: Int }
-
-
-type MouseData = { event :: MouseEvent, button :: MouseButton, location :: Point }
+type MouseData
+  = { event :: MouseEvent, button :: MouseButton, location :: Point }
