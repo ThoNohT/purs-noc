@@ -87,19 +87,21 @@ toMouseData eventType event =
     , location: { x: ME.clientX event, y: ME.clientY event }
     }
 
+focusElement :: String -> Effect Unit
+focusElement elementId = do
+  document <- H.liftEffect $ Web.document =<< Web.window
+  element <- H.liftEffect $ NEPN.getElementById elementId $ HTMLDocument.toNonElementParentNode document
+  let
+    element' = unsafePartial fromJust (element >>= HTMLElement.fromElement)
+  HTMLElement.focus element'
+
 update ::
   forall state.
   CanvasAppSpec state ->
   Msg ->
   H.HalogenM state Msg () Void Aff Unit
 update appSpec = case _ of
-  Init -> do
-    -- Set focus to the canvas.
-    document <- H.liftEffect $ Web.document =<< Web.window
-    element <- H.liftEffect $ NEPN.getElementById "render-canvas" $ HTMLDocument.toNonElementParentNode document
-    let
-      element' = unsafePartial fromJust (element >>= HTMLElement.fromElement)
-    H.liftEffect $ HTMLElement.focus element'
+  Init -> H.liftEffect $ focusElement "render-canvas"
   Tick interval -> HS.modify_ (appSpec.tick interval)
   Keyboard kbData -> HS.modify_ (appSpec.handleKeyboard kbData)
   Mouse mouseData -> HS.modify_ (appSpec.handleMouse mouseData)
