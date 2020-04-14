@@ -1,6 +1,7 @@
 module App (CanvasApp, app, defaultAppSpec) where
 
 import Prelude
+
 import Control.Monad.State as HS
 import Data.Const (Const)
 import Data.Int.Bits ((.&.))
@@ -15,6 +16,7 @@ import Model (Interval, KeyData, KeyEvent(..), MouseButton(..), MouseData, Mouse
 import Partial.Unsafe (unsafePartial)
 import Web.DOM.Element as E
 import Web.DOM.NonElementParentNode as NEPN
+import Web.HTML (HTMLDocument)
 import Web.HTML (window) as Web
 import Web.HTML.HTMLDocument as HTMLDocument
 import Web.HTML.Window (document) as Web
@@ -92,12 +94,12 @@ update appSpec = case _ of
     H.subscribe' \_ ->
       ES.eventListenerEventSource
         KET.keyup
-        (E.toEventTarget element')
+        (HTMLDocument.toEventTarget document)
         (map (toKeyData KeyUp >>> Keyboard) <<< KE.fromEvent)
     H.subscribe' \_ ->
       ES.eventListenerEventSource
         KET.keydown
-        (E.toEventTarget element')
+        (HTMLDocument.toEventTarget document)
         (map (toKeyData KeyDown >>> Keyboard) <<< KE.fromEvent)
     H.subscribe' \_ ->
       ES.eventListenerEventSource
