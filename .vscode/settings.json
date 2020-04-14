@@ -1,0 +1,4 @@
+{
+    "purescript.addSpagoSources": true,
+    "purescript.packagePath": ".spago"
+  }
