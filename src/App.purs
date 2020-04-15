@@ -21,18 +21,19 @@ import Web.HTML.Window (document) as Web
 import Web.UIEvent.KeyboardEvent as KE
 import Web.UIEvent.MouseEvent as ME
 
+-- App specification --
 type CanvasApp
   = H.Component HH.HTML (Const Void) Unit Void Aff
 
 type CanvasAppSpec state
   = { initialState :: state
-    , tick :: Interval -> state -> state
-    , handleKeyboard :: KeyData -> state -> state
-    , handleMouse :: MouseData -> state -> state
+    , tick :: Interval -> state -> Maybe state
+    , handleKeyboard :: KeyData -> state -> Maybe state
+    , handleMouse :: MouseData -> state -> Maybe state
     , render :: state -> Effect Unit
     }
 
-data Msg
+data Action
   = Init
   | Tick Interval
   | Keyboard KeyData
@@ -42,13 +43,17 @@ data Msg
 defaultAppSpec :: forall state. state -> CanvasAppSpec state
 defaultAppSpec initialState =
   { initialState: initialState
-  , tick: \_ s -> s
-  , handleKeyboard: \_ s -> s
-  , handleMouse: \_ s -> s
+  , tick: const2 Nothing
+  , handleKeyboard: const2 Nothing
+  , handleMouse: const2 Nothing
   , render: const (pure unit)
   }
 
-view :: H.ComponentHTML Msg () Aff
+-- Component implementation --
+type ComponentState state
+  = { changed :: Boolean, state :: state }
+
+view :: H.ComponentHTML Action () Aff
 view =
   HH.canvas
     [ HP.id_ "render-canvas"
@@ -61,6 +66,36 @@ view =
     , HE.onKeyDown (toKeyData KeyDown >>> Keyboard >>> Just)
     , HE.onKeyUp (toKeyData KeyUp >>> Keyboard >>> Just)
     ]
+
+update ::
+  forall state.
+  CanvasAppSpec state ->
+  Action ->
+  H.HalogenM (ComponentState state) Action () Void Aff Unit
+update appSpec = case _ of
+  Init -> H.liftEffect $ focusElement "render-canvas"
+  Tick interval -> mapState $ appSpec.tick interval
+  Keyboard kbData -> mapState $ appSpec.handleKeyboard kbData
+  Mouse mouseData -> mapState $ appSpec.handleMouse mouseData
+  Render -> do
+    currentState <- HS.get
+    if currentState.changed then H.liftEffect (appSpec.render currentState.state) else H.liftEffect $ pure unit
+    HS.put currentState { changed = false }
+
+app ::
+  forall state.
+  CanvasAppSpec state ->
+  H.Component HH.HTML (Const Void) Unit Void Aff
+app appSpec =
+  H.mkComponent
+    { initialState: const { changed: true, state: appSpec.initialState }
+    , render: const view
+    , eval: H.mkEval $ H.defaultEval { handleAction = update appSpec, initialize = Just Init }
+    }
+
+-- Helpers --
+const2 :: forall a b c. a -> b -> c -> a
+const2 a _ _ = a
 
 toKeyData :: KeyEvent -> KE.KeyboardEvent -> KeyData
 toKeyData eventType event =
@@ -87,6 +122,15 @@ toMouseData eventType event =
     , location: { x: ME.clientX event, y: ME.clientY event }
     }
 
+mapState :: forall state. (state -> Maybe state) -> H.HalogenM (ComponentState state) Action () Void Aff Unit
+mapState f = do
+  currentState <- HS.get
+  let
+    newState = f currentState.state
+  case newState of
+    Just s -> HS.put currentState { changed = true, state = s }
+    _ -> H.liftEffect $ pure unit
+
 focusElement :: String -> Effect Unit
 focusElement elementId = do
   document <- H.liftEffect $ Web.document =<< Web.window
@@ -94,28 +138,3 @@ focusElement elementId = do
   let
     element' = unsafePartial fromJust (element >>= HTMLElement.fromElement)
   HTMLElement.focus element'
-
-update ::
-  forall state.
-  CanvasAppSpec state ->
-  Msg ->
-  H.HalogenM state Msg () Void Aff Unit
-update appSpec = case _ of
-  Init -> H.liftEffect $ focusElement "render-canvas"
-  Tick interval -> HS.modify_ (appSpec.tick interval)
-  Keyboard kbData -> HS.modify_ (appSpec.handleKeyboard kbData)
-  Mouse mouseData -> HS.modify_ (appSpec.handleMouse mouseData)
-  Render -> do
-    currentState <- HS.get
-    H.liftEffect (appSpec.render currentState)
-
-app ::
-  forall state.
-  CanvasAppSpec state ->
-  H.Component HH.HTML (Const Void) Unit Void Aff
-app appSpec =
-  H.mkComponent
-    { initialState: const appSpec.initialState
-    , render: const view
-    , eval: H.mkEval $ H.defaultEval { handleAction = update appSpec, initialize = Just Init }
-    }
