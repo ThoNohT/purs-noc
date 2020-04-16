@@ -2,10 +2,10 @@ module Apps.RandomWalker (app) where
 
 import Prelude
 
-import Data.Maybe (Maybe(..))
 import App as App
-import Debug as Debug
+import Data.Maybe (Maybe(..))
 import Effect.Console (log)
+import Data.String (drop)
 
 
 app :: App.CanvasApp
@@ -13,6 +13,11 @@ app =
   App.app
     $ (App.defaultAppSpec "")
         { render = \state -> log state
-        , handleKeyboard = \e s -> Debug.unsafeLog e.keyCode # \_ -> Nothing
-        , handleMouse = \e s -> Debug.unsafeLog e.location # \_ -> Debug.unsafeLog e # \_ -> Nothing
+        , updateInterval = 33
+        , handleKeyboard = \e s -> Just $ e.keyCode <> s
+        -- , handleMouse = \e s -> Debug.unsafeLog e.location # \_ -> Debug.unsafeLog e # \_ -> Nothing
+        , tick = \_ s ->
+            case s of
+                "" -> Nothing
+                _ -> Just $ drop 1 s
         }

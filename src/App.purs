@@ -1,16 +1,21 @@
 module App (CanvasApp, app, defaultAppSpec) where
 
 import Prelude
+
 import Control.Monad.State as HS
 import Data.Const (Const)
 import Data.Int.Bits ((.&.))
 import Data.Maybe (Maybe(..), fromJust)
 import Effect (Effect)
 import Effect.Aff (Aff)
+import Effect.Aff.Class (class MonadAff)
+import Effect.Timer as Timer
+import Halogen (HalogenQ(..))
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import Halogen.Query.EventSource as ES
 import Model (Interval, KeyData, KeyEvent(..), MouseButton(..), MouseData, MouseEvent(..))
 import Partial.Unsafe (unsafePartial)
 import Web.DOM.NonElementParentNode as NEPN
@@ -18,10 +23,9 @@ import Web.HTML (window) as Web
 import Web.HTML.HTMLDocument as HTMLDocument
 import Web.HTML.HTMLElement as HTMLElement
 import Web.HTML.Window (document) as Web
+import Web.HTML.Window as Window
 import Web.UIEvent.KeyboardEvent as KE
 import Web.UIEvent.MouseEvent as ME
-import Halogen.Query.EventSource as ES
-import Effect.Timer as Timer
 
 -- App specification --
 type CanvasApp
@@ -41,7 +45,7 @@ data Action
   | Tick Interval
   | Keyboard KeyData
   | Mouse MouseData
-  | Render
+  | Render (ES.Emitter Effect Action)
 
 defaultAppSpec :: forall state. state -> CanvasAppSpec state
 defaultAppSpec initialState =
@@ -78,23 +82,22 @@ update ::
   H.HalogenM (ComponentState state) Action () Void Aff Unit
 update appSpec = case _ of
   Init -> do
-    let
-      eventSource =
-        ES.effectEventSource
-          $ \emitter -> do
-              let
-                passTick = ES.emit emitter (Tick { milliseconds: appSpec.updateInterval })
-              intervalId <- Timer.setInterval appSpec.updateInterval passTick
-              pure $ ES.Finalizer (Timer.clearInterval intervalId)
-    _ <- H.subscribe $ eventSource
+    _ <- H.subscribe $ tickSource appSpec.updateInterval
+    _ <- H.subscribe $ renderSource
     H.liftEffect $ focusElement "render-canvas"
   Tick interval -> mapState $ appSpec.tick interval
   Keyboard kbData -> mapState $ appSpec.handleKeyboard kbData
   Mouse mouseData -> mapState $ appSpec.handleMouse mouseData
-  Render -> do
+  Render emitter -> do
     currentState <- HS.get
     if currentState.changed then H.liftEffect (appSpec.render currentState.state) else H.liftEffect $ pure unit
     HS.put currentState { changed = false }
+    H.liftEffect $ do
+        let
+            passRender = ES.emit emitter (Render emitter)
+        window <- Web.window
+        _ <- H.liftEffect $ Window.requestAnimationFrame passRender window
+        pure unit
 
 app ::
   forall state.
@@ -152,3 +155,22 @@ focusElement elementId = do
   let
     element' = unsafePartial fromJust (element >>= HTMLElement.fromElement)
   HTMLElement.focus element'
+
+tickSource :: forall a. MonadAff a => Int -> ES.EventSource a Action
+tickSource interval =
+  ES.effectEventSource
+    $ \emitter -> do
+        let
+          passTick = ES.emit emitter (Tick { milliseconds: interval })
+        intervalId <- Timer.setInterval interval passTick
+        pure $ ES.Finalizer (Timer.clearInterval intervalId)
+
+renderSource :: forall a. MonadAff a => ES.EventSource a Action
+renderSource =
+    ES.effectEventSource
+        $ \emitter -> do
+            let
+                passRender = ES.emit emitter (Render emitter)
+            window <- Web.window
+            frameId <- Window.requestAnimationFrame passRender window
+            pure $ ES.Finalizer (Window.cancelAnimationFrame frameId window)
