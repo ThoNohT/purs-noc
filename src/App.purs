@@ -20,6 +20,8 @@ import Web.HTML.HTMLElement as HTMLElement
 import Web.HTML.Window (document) as Web
 import Web.UIEvent.KeyboardEvent as KE
 import Web.UIEvent.MouseEvent as ME
+import Halogen.Query.EventSource as ES
+import Effect.Timer as Timer
 
 -- App specification --
 type CanvasApp
@@ -31,6 +33,7 @@ type CanvasAppSpec state
     , handleKeyboard :: KeyData -> state -> Maybe state
     , handleMouse :: MouseData -> state -> Maybe state
     , render :: state -> Effect Unit
+    , updateInterval :: Int
     }
 
 data Action
@@ -47,6 +50,7 @@ defaultAppSpec initialState =
   , handleKeyboard: const2 Nothing
   , handleMouse: const2 Nothing
   , render: const (pure unit)
+  , updateInterval: 33
   }
 
 -- Component implementation --
@@ -73,7 +77,17 @@ update ::
   Action ->
   H.HalogenM (ComponentState state) Action () Void Aff Unit
 update appSpec = case _ of
-  Init -> H.liftEffect $ focusElement "render-canvas"
+  Init -> do
+    let
+      eventSource =
+        ES.effectEventSource
+          $ \emitter -> do
+              let
+                passTick = ES.emit emitter (Tick { milliseconds: appSpec.updateInterval })
+              intervalId <- Timer.setInterval appSpec.updateInterval passTick
+              pure $ ES.Finalizer (Timer.clearInterval intervalId)
+    _ <- H.subscribe $ eventSource
+    H.liftEffect $ focusElement "render-canvas"
   Tick interval -> mapState $ appSpec.tick interval
   Keyboard kbData -> mapState $ appSpec.handleKeyboard kbData
   Mouse mouseData -> mapState $ appSpec.handleMouse mouseData
