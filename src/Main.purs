@@ -5,7 +5,7 @@ import Effect (Effect)
 import Halogen.Aff as HA
 import Halogen.VDom.Driver (runUI)
 -- Import a specific app here as ActiveApp to run this app.
-import Apps.RandomWalker as ActiveApp
+import Apps.MouseDot as ActiveApp
 
 main :: Effect Unit
 main =

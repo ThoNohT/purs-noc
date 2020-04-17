@@ -3,12 +3,14 @@ module App (CanvasApp, app, defaultAppSpec) where
 import Prelude
 import Control.Monad.State as HS
 import Data.Const (Const)
+import Data.Int (toNumber)
 import Data.Int.Bits ((.&.))
 import Data.Maybe (Maybe(..), fromJust)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Timer as Timer
+import Graphics.Canvas as CV
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
@@ -34,7 +36,8 @@ type CanvasAppSpec state
     , tick :: Interval -> state -> Maybe state
     , handleKeyboard :: KeyData -> state -> Maybe state
     , handleMouse :: MouseData -> state -> Maybe state
-    , render :: state -> Effect Unit
+    , initialize :: CV.CanvasElement -> state -> Effect Unit
+    , render :: CV.Context2D -> state -> Effect Unit
     , updateInterval :: Int
     }
 
@@ -51,13 +54,14 @@ defaultAppSpec initialState =
   , tick: const2 Nothing
   , handleKeyboard: const2 Nothing
   , handleMouse: const2 Nothing
-  , render: const (pure unit)
+  , render: const2 (pure unit)
+  , initialize: const2 (pure unit)
   , updateInterval: 33
   }
 
 -- Component implementation --
 type ComponentState state
-  = { changed :: Boolean, state :: state }
+  = { changed :: Boolean, state :: state, context :: Maybe CV.Context2D }
 
 view :: H.ComponentHTML Action () Aff
 view =
@@ -83,12 +87,19 @@ update appSpec = case _ of
     _ <- H.subscribe $ tickSource appSpec.updateInterval
     _ <- H.subscribe $ renderSource
     H.liftEffect $ focusElement "render-canvas"
+    canvas <- H.liftEffect $ unsafePartial fromJust <$> CV.getCanvasElementById "render-canvas"
+    context <- H.liftEffect $ CV.getContext2D canvas
+    currentState <- HS.get
+    HS.put $ currentState { context = Just context }
+    H.liftEffect $ appSpec.initialize canvas currentState.state
   Tick interval -> mapState $ appSpec.tick interval
   Keyboard kbData -> mapState $ appSpec.handleKeyboard kbData
   Mouse mouseData -> mapState $ appSpec.handleMouse mouseData
   Render emitter -> do
     currentState <- HS.get
-    if currentState.changed then H.liftEffect (appSpec.render currentState.state) else H.liftEffect $ pure unit
+    case { changed: currentState.changed, context: currentState.context } of
+      { changed: true, context: Just ctx } -> H.liftEffect (appSpec.render ctx currentState.state)
+      _ -> H.liftEffect $ pure unit
     HS.put currentState { changed = false }
     H.liftEffect
       $ do
@@ -102,9 +113,9 @@ app ::
   forall state.
   CanvasAppSpec state ->
   H.Component HH.HTML (Const Void) Unit Void Aff
-app appSpec =
+app appSpec = do
   H.mkComponent
-    { initialState: const { changed: true, state: appSpec.initialState }
+    { initialState: const { changed: true, state: appSpec.initialState, context: Nothing }
     , render: const view
     , eval: H.mkEval $ H.defaultEval { handleAction = update appSpec, initialize = Just Init }
     }
@@ -135,7 +146,7 @@ toMouseData eventType event =
   in
     { event: eventType
     , button: button
-    , location: { x: ME.clientX event, y: ME.clientY event }
+    , location: { x: ME.clientX event # toNumber, y: ME.clientY event # toNumber }
     }
 
 mapState :: forall state. (state -> Maybe state) -> H.HalogenM (ComponentState state) Action () Void Aff Unit
@@ -160,7 +171,7 @@ tickSource interval =
   ES.effectEventSource
     $ \emitter -> do
         let
-          passTick = ES.emit emitter (Tick { milliseconds: interval })
+          passTick = ES.emit emitter (Tick { milliseconds: toNumber interval })
         intervalId <- Timer.setInterval interval passTick
         pure $ ES.Finalizer (Timer.clearInterval intervalId)
 

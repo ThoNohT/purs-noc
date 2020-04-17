@@ -4,7 +4,8 @@ You can edit this file as you like.
 -}
 { name = "purs-noc"
 , dependencies =
-  [ "console"
+  [ "canvas"
+  , "console"
   , "effect"
   , "halogen"
   , "integers"

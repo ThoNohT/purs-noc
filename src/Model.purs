@@ -1,7 +1,7 @@
 module Model where
 
 type Interval
-  = { milliseconds :: Int }
+  = { milliseconds :: Number }
 
 data KeyEvent
   = KeyUp
@@ -23,7 +23,7 @@ data MouseButton
   | None
 
 type Point
-  = { x :: Int, y :: Int }
+  = { x :: Number, y :: Number }
 
 type MouseData
   = { event :: MouseEvent
