@@ -1,7 +1,6 @@
 module App (CanvasApp, app, defaultAppSpec) where
 
 import Prelude
-
 import Control.Monad.State as HS
 import Data.Const (Const)
 import Data.Int.Bits ((.&.))
@@ -10,7 +9,6 @@ import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Timer as Timer
-import Halogen (HalogenQ(..))
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
@@ -92,12 +90,13 @@ update appSpec = case _ of
     currentState <- HS.get
     if currentState.changed then H.liftEffect (appSpec.render currentState.state) else H.liftEffect $ pure unit
     HS.put currentState { changed = false }
-    H.liftEffect $ do
-        let
+    H.liftEffect
+      $ do
+          let
             passRender = ES.emit emitter (Render emitter)
-        window <- Web.window
-        _ <- H.liftEffect $ Window.requestAnimationFrame passRender window
-        pure unit
+          window <- Web.window
+          _ <- H.liftEffect $ Window.requestAnimationFrame passRender window
+          pure unit
 
 app ::
   forall state.
@@ -167,10 +166,10 @@ tickSource interval =
 
 renderSource :: forall a. MonadAff a => ES.EventSource a Action
 renderSource =
-    ES.effectEventSource
-        $ \emitter -> do
-            let
-                passRender = ES.emit emitter (Render emitter)
-            window <- Web.window
-            frameId <- Window.requestAnimationFrame passRender window
-            pure $ ES.Finalizer (Window.cancelAnimationFrame frameId window)
+  ES.effectEventSource
+    $ \emitter -> do
+        let
+          passRender = ES.emit emitter (Render emitter)
+        window <- Web.window
+        frameId <- Window.requestAnimationFrame passRender window
+        pure $ ES.Finalizer (Window.cancelAnimationFrame frameId window)
