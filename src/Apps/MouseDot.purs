@@ -35,5 +35,5 @@ app =
         { initialize = initialize
         , render = render
         , updateInterval = 10000
-        , handleMouse = \e _ -> Just e.location
+        , handleMouse = \e _ -> pure $ Just e.location
         }

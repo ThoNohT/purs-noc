@@ -10,8 +10,10 @@ You can edit this file as you like.
   , "halogen"
   , "integers"
   , "js-timers"
+  , "math"
   , "partial"
   , "psci-support"
+  , "random"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs" ]

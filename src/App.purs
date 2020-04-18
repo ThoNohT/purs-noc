@@ -33,9 +33,9 @@ type CanvasApp
 
 type CanvasAppSpec state
   = { initialState :: state
-    , tick :: Interval -> state -> Maybe state
-    , handleKeyboard :: KeyData -> state -> Maybe state
-    , handleMouse :: MouseData -> state -> Maybe state
+    , tick :: Interval -> state -> Effect (Maybe state)
+    , handleKeyboard :: KeyData -> state -> Effect (Maybe state)
+    , handleMouse :: MouseData -> state -> Effect (Maybe state)
     , initialize :: CV.CanvasElement -> state -> Effect Unit
     , render :: CV.Context2D -> state -> Effect Unit
     , updateInterval :: Int
@@ -51,9 +51,9 @@ data Action
 defaultAppSpec :: forall state. state -> CanvasAppSpec state
 defaultAppSpec initialState =
   { initialState: initialState
-  , tick: const2 Nothing
-  , handleKeyboard: const2 Nothing
-  , handleMouse: const2 Nothing
+  , tick: const2 $ pure Nothing
+  , handleKeyboard: const2 $ pure Nothing
+  , handleMouse: const2 $ pure Nothing
   , render: const2 (pure unit)
   , initialize: const2 (pure unit)
   , updateInterval: 33
@@ -149,11 +149,10 @@ toMouseData eventType event =
     , location: { x: ME.clientX event # toNumber, y: ME.clientY event # toNumber }
     }
 
-mapState :: forall state. (state -> Maybe state) -> H.HalogenM (ComponentState state) Action () Void Aff Unit
+mapState :: forall state. (state -> Effect (Maybe state)) -> H.HalogenM (ComponentState state) Action () Void Aff Unit
 mapState f = do
   currentState <- HS.get
-  let
-    newState = f currentState.state
+  newState <- H.liftEffect $ f currentState.state
   case newState of
     Just s -> HS.put currentState { changed = true, state = s }
     _ -> H.liftEffect $ pure unit
