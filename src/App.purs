@@ -16,7 +16,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.Query.EventSource as ES
-import Model (Interval, KeyData, KeyEvent(..), MouseButton(..), MouseData, MouseEvent(..))
+import Model (KeyData, KeyEvent(..), MouseButton(..), MouseData, MouseEvent(..))
 import Partial.Unsafe (unsafePartial)
 import Web.DOM.NonElementParentNode as NEPN
 import Web.HTML (window) as Web
@@ -33,7 +33,7 @@ type CanvasApp
 
 type CanvasAppSpec state
   = { initialState :: state
-    , tick :: Interval -> state -> Effect (Maybe state)
+    , tick :: state -> Effect (Maybe state)
     , handleKeyboard :: KeyData -> state -> Effect (Maybe state)
     , handleMouse :: MouseData -> state -> Effect (Maybe state)
     , initialize :: CV.CanvasElement -> state -> Effect Unit
@@ -43,7 +43,7 @@ type CanvasAppSpec state
 
 data Action
   = Init
-  | Tick Interval
+  | Tick
   | Keyboard KeyData
   | Mouse MouseData
   | Render (ES.Emitter Effect Action)
@@ -51,7 +51,7 @@ data Action
 defaultAppSpec :: forall state. state -> CanvasAppSpec state
 defaultAppSpec initialState =
   { initialState: initialState
-  , tick: const2 $ pure Nothing
+  , tick: const $ pure Nothing
   , handleKeyboard: const2 $ pure Nothing
   , handleMouse: const2 $ pure Nothing
   , render: const2 (pure unit)
@@ -92,7 +92,7 @@ update appSpec = case _ of
     currentState <- HS.get
     HS.put $ currentState { context = Just context }
     H.liftEffect $ appSpec.initialize canvas currentState.state
-  Tick interval -> mapState $ appSpec.tick interval
+  Tick -> mapState $ appSpec.tick
   Keyboard kbData -> mapState $ appSpec.handleKeyboard kbData
   Mouse mouseData -> mapState $ appSpec.handleMouse mouseData
   Render emitter -> do
@@ -170,7 +170,7 @@ tickSource interval =
   ES.effectEventSource
     $ \emitter -> do
         let
-          passTick = ES.emit emitter (Tick { milliseconds: toNumber interval })
+          passTick = ES.emit emitter Tick
         intervalId <- Timer.setInterval interval passTick
         pure $ ES.Finalizer (Timer.clearInterval intervalId)
 

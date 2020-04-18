@@ -1,9 +1,5 @@
 module Model where
 
--- | Defines an interval in milliseconds.
-type Interval
-  = { milliseconds :: Number }
-
 -- | The possible types of keyboard events that can happen.
 data KeyEvent
   = KeyUp

@@ -8,7 +8,6 @@ import App as App
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Graphics.Canvas as GC
-import Model (Interval)
 import Apps.Randomwalker3.Walker as Walker
 import Graphics (background)
 
@@ -26,8 +25,8 @@ initialize canvas state = do
   _ <- GC.setCanvasDimensions canvas canvasSize
   background canvas "black"
 
-tick :: Interval -> State -> Effect (Maybe State)
-tick _ state = do
+tick :: State -> Effect (Maybe State)
+tick state = do
   Just <$> Walker.update state
 
 -- | Renders a white background, and a red square around the mouse position.

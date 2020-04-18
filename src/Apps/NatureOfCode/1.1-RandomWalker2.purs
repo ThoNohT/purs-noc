@@ -7,7 +7,7 @@ import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Random as Random
 import Graphics.Canvas as GC
-import Model (Vector2, Interval)
+import Model (Vector2)
 import Graphics (background, point)
 
 -- | The state just contains the location of the mouse.
@@ -24,8 +24,8 @@ initialize canvas state = do
   _ <- GC.setCanvasDimensions canvas canvasSize
   background canvas "black"
 
-tick :: Interval -> State -> Effect (Maybe State)
-tick _ state = do
+tick :: State -> Effect (Maybe State)
+tick state = do
   diffX <- Random.randomRange (-1.0) 1.0
   diffY <- Random.randomRange (-1.0) 1.0
   pure $ Just state { x = state.x + diffX, y = state.y + diffY }

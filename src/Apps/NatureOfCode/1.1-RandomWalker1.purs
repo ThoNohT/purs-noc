@@ -8,7 +8,7 @@ import App as App
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Graphics.Canvas as GC
-import Model (Vector2, Interval)
+import Model (Vector2)
 import Effect.Random as Random
 import Graphics (background, point)
 
@@ -26,8 +26,8 @@ initialize canvas state = do
   _ <- GC.setCanvasDimensions canvas canvasSize
   background canvas "black"
 
-tick :: Interval -> State -> Effect (Maybe State)
-tick _ state = do
+tick :: State -> Effect (Maybe State)
+tick state = do
     val <- Random.randomInt 0 3
     let newState = case { val: val } of
                     { val: 0 } -> state { x = state.x + 1.0 }
