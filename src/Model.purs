@@ -27,13 +27,13 @@ data MouseButton
   | RightButton
   | None
 
--- | A point, with an x, and a y component.
-type Point
+-- | A 2-dimensional vector, with an x, and a y component.
+type Vector2
   = { x :: Number, y :: Number }
 
 -- | The data in a mouse event.
 type MouseData
   = { event :: MouseEvent
     , button :: MouseButton
-    , location :: Point
+    , location :: Vector2
     }

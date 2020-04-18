@@ -8,13 +8,13 @@ import App as App
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Graphics.Canvas as GC
-import Model (Point, Interval)
+import Model (Vector2, Interval)
 import Effect.Random as Random
 import Graphics (background, point)
 
 -- | The state just contains the location of the mouse.
 type State
-  = Point
+  = Vector2
 
 -- | This value is used to set and get the canvas size everywhere  else.
 canvasSize :: GC.Dimensions

@@ -2,7 +2,7 @@
 module Apps.Randomwalker3.Walker (Walker, update, render) where
 
 import Prelude
-import Model (Point)
+import Model (Vector2)
 import Effect (Effect)
 import Graphics.Canvas as GC
 import Effect.Random as Random
@@ -10,7 +10,7 @@ import Graphics (point)
 
 -- | The walker type, contains just an x, and a y coordinate.
 type Walker
-  = Point
+  = Vector2
 
 -- | Updates the walker, performing a walk step.
 update :: Walker -> Effect Walker
