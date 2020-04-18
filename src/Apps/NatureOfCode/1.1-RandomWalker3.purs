@@ -37,7 +37,7 @@ render ctx state = Walker.render ctx state
 app :: App.CanvasApp
 app =
   App.app
-    $ (App.defaultAppSpec { x: canvasSize.width / 2.0, y: canvasSize.height / 2.0 })
+    $ (App.defaultAppSpec $ Walker.init canvasSize)
         { initialize = initialize
         , render = render
         , tick = tick

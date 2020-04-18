@@ -1,4 +1,6 @@
-module Model where
+module Model.Events where
+
+import Model.Vector (Vector2)
 
 -- | The possible types of keyboard events that can happen.
 data KeyEvent
@@ -22,10 +24,6 @@ data MouseButton
   = LeftButton
   | RightButton
   | None
-
--- | A 2-dimensional vector, with an x, and a y component.
-type Vector2
-  = { x :: Number, y :: Number }
 
 -- | The data in a mouse event.
 type MouseData

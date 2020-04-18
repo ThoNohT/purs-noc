@@ -16,7 +16,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.Query.EventSource as ES
-import Model (KeyData, KeyEvent(..), MouseButton(..), MouseData, MouseEvent(..))
+import Model.Events (KeyData, KeyEvent(..), MouseButton(..), MouseData, MouseEvent(..))
 import Partial.Unsafe (unsafePartial)
 import Web.DOM.NonElementParentNode as NEPN
 import Web.HTML (window) as Web
@@ -26,6 +26,7 @@ import Web.HTML.Window (document) as Web
 import Web.HTML.Window as Window
 import Web.UIEvent.KeyboardEvent as KE
 import Web.UIEvent.MouseEvent as ME
+import Model.Vector ((<=>))
 
 -- App specification --
 type CanvasApp
@@ -146,7 +147,7 @@ toMouseData eventType event =
   in
     { event: eventType
     , button: button
-    , location: { x: ME.clientX event # toNumber, y: ME.clientY event # toNumber }
+    , location: (ME.clientX event # toNumber) <=> (ME.clientY event # toNumber)
     }
 
 mapState :: forall state. (state -> Effect (Maybe state)) -> H.HalogenM (ComponentState state) Action () Void Aff Unit

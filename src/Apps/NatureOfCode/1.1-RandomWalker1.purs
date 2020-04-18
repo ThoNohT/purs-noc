@@ -3,12 +3,11 @@
 module Apps.RandomWalker1 (app) where
 
 import Prelude
-
 import App as App
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Graphics.Canvas as GC
-import Model (Vector2)
+import Model.Vector (Vector2, (<=>))
 import Effect.Random as Random
 import Graphics (background, point)
 
@@ -28,13 +27,14 @@ initialize canvas state = do
 
 tick :: State -> Effect (Maybe State)
 tick state = do
-    val <- Random.randomInt 0 3
-    let newState = case { val: val } of
-                    { val: 0 } -> state { x = state.x + 1.0 }
-                    { val: 1 } -> state { x = state.x - 1.0 }
-                    { val: 2 } -> state { y = state.y + 1.0 }
-                    { val: _ } -> state { y = state.y - 1.0 }
-    pure $ Just newState
+  val <- Random.randomInt 0 3
+  let
+    newState = case { val: val } of
+      { val: 0 } -> state + (1.0 <=> 0.0)
+      { val: 1 } -> state - (1.0 <=> 0.0)
+      { val: 2 } -> state + (0.0 <=> 1.0)
+      { val: _ } -> state - (0.0 <=> 1.0)
+  pure $ Just newState
 
 -- | Renders a white background, and a red square around the mouse position.
 render :: GC.Context2D -> State -> Effect Unit
@@ -46,7 +46,7 @@ render ctx state = do
 app :: App.CanvasApp
 app =
   App.app
-    $ (App.defaultAppSpec { x: canvasSize.width / 2.0, y: canvasSize.height / 2.0 })
+    $ (App.defaultAppSpec ((canvasSize.width / 2.0) <=> (canvasSize.height / 2.0)))
         { initialize = initialize
         , render = render
         , tick = tick

@@ -5,10 +5,9 @@ import Prelude
 import App as App
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
-import Effect.Random as Random
-import Graphics.Canvas as GC
-import Model (Vector2)
 import Graphics (background, point)
+import Graphics.Canvas as GC
+import Model.Vector (Vector2, randomVector, (<=>))
 
 -- | The state just contains the location of the mouse.
 type State
@@ -26,9 +25,8 @@ initialize canvas state = do
 
 tick :: State -> Effect (Maybe State)
 tick state = do
-  diffX <- Random.randomRange (-1.0) 1.0
-  diffY <- Random.randomRange (-1.0) 1.0
-  pure $ Just state { x = state.x + diffX, y = state.y + diffY }
+  diff <- randomVector
+  pure $ Just $ state + diff
 
 -- | Renders a white background, and a red square around the mouse position.
 render :: GC.Context2D -> State -> Effect Unit
@@ -40,7 +38,7 @@ render ctx state = do
 app :: App.CanvasApp
 app =
   App.app
-    $ (App.defaultAppSpec { x: canvasSize.width / 2.0, y: canvasSize.height / 2.0 })
+    $ (App.defaultAppSpec ((canvasSize.width / 2.0) <=> (canvasSize.height / 2.0)))
         { initialize = initialize
         , render = render
         , tick = tick
