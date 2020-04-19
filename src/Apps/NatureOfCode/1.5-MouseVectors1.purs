@@ -9,15 +9,12 @@ import Graphics as G
 import Model.Events (MouseEvent(..), MouseData)
 import Model.Vector (Vector2, (<=>), (|/|))
 
--- | The state just contains the location of the mouse.
 type State
   = Vector2
 
--- | This value is used to set and get the canvas size everywhere  else.
 canvasSize :: Vector2
 canvasSize = 400.0 <=> 400.0
 
--- | Sets the canvas to the desired size.
 initialize :: G.GraphicsContext -> State -> Effect (Maybe State)
 initialize ctx _ = do
   _ <- G.setCanvasSize ctx canvasSize
@@ -33,7 +30,6 @@ handleMouse mouse state = case mouse.event of
   MouseMove -> pure $ Just mouse.location
   _ -> pure Nothing
 
--- | Renders a white background, and a red square around the mouse position.
 render :: G.GraphicsContext -> State -> Effect Unit
 render ctx state = do
   _ <- G.resetTransform ctx
@@ -44,7 +40,6 @@ render ctx state = do
   _ <- G.setStrokeWidth ctx 2.0
   G.line ctx zero v
 
--- | Define the main application.
 app :: App.CanvasApp
 app =
   App.app

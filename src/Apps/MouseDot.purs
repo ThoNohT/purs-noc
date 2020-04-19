@@ -11,7 +11,7 @@ import Model.Vector (Vector2, (<=>), diagonal)
 type State
   = Vector2
 
--- | This value is used to set and get the canvas size everywhere  else.
+-- | This value is used to set and get the canvas size everywhere else.
 canvasSize :: Vector2
 canvasSize = 1024.0 <=> 768.0
 
