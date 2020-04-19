@@ -115,7 +115,7 @@ app ::
   H.Component HH.HTML (Const Void) Unit Void Aff
 app appSpec = do
   H.mkComponent
-    { initialState: const { changed: true, state: appSpec.initialState, context: Nothing }
+    { initialState: const { changed: false, state: appSpec.initialState, context: Nothing }
     , render: const view
     , eval: H.mkEval $ H.defaultEval { handleAction = update appSpec, initialize = Just Init }
     }
