@@ -7,7 +7,7 @@ import Prelude
 import App as App
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
-import Graphics (background, fillArea, point)
+import Graphics (fillArea, point)
 import Graphics.Canvas as GC
 import Model.Vector (Vector2, diagonal, (<=>))
 
@@ -22,8 +22,7 @@ canvasSize = { width: 400.0, height: 400.0 }
 -- | Sets the canvas to the desired size.
 initialize :: GC.CanvasElement -> State -> Effect Unit
 initialize canvas state = do
-  _ <- GC.setCanvasDimensions canvas canvasSize
-  background canvas "black"
+  GC.setCanvasDimensions canvas canvasSize
 
 tick :: State -> Effect (Maybe State)
 tick state = do
