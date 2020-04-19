@@ -1,15 +1,15 @@
--- | Implements the vectors pointing at the mouse from https://www.youtube.com/watch?v=ttz05d8DSOs.
-module Apps.NatureOfCode.MouseVectors (app) where
+-- | Implements the vector pointing at the mouse with normalized length from https://www.youtube.com/watch?v=ttz05d8DSOs.
+module Apps.NatureOfCode.MouseVectors2 (app) where
 
 import Prelude
 
 import App as App
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
-import Graphics (background, line, resetTransform)
+import Graphics (fillArea, line, resetTransform)
 import Graphics.Canvas as GC
 import Model.Events (MouseEvent(..), MouseData)
-import Model.Vector (Vector2, (<=>))
+import Model.Vector (Vector2, setMagnitude, (<=>))
 
 -- | The state just contains the location of the mouse.
 type State
@@ -23,7 +23,6 @@ canvasSize = { width: 400.0, height: 400.0 }
 initialize :: GC.CanvasElement -> State -> Effect (Maybe State)
 initialize canvas _ = do
   _ <- GC.setCanvasDimensions canvas canvasSize
-  _ <- background canvas "black"
   pure Nothing
 
 tick :: State -> Effect (Maybe State)
@@ -39,11 +38,12 @@ handleMouse mouse state = case mouse.event of
 render :: GC.Context2D -> State -> Effect Unit
 render ctx state = do
   _ <- resetTransform ctx
+  _ <- fillArea ctx zero (canvasSize.width <=> canvasSize.height) "black"
   _ <- GC.translate ctx { translateX: canvasSize.width / 2.0, translateY: canvasSize.height / 2.0 }
 
-  let v = state - (200.0 <=> 200.0)
+  let v = state - (200.0 <=> 200.0) # setMagnitude 50.0
 
-  _ <- GC.setStrokeStyle ctx "#FFFFFF64"
+  _ <- GC.setStrokeStyle ctx "white"
   _ <- GC.setLineWidth ctx 2.0
   line ctx zero v
 
