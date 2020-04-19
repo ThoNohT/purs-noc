@@ -44,6 +44,8 @@ instance vectorVector2 :: Vector Vector2 where
     y <- Random.randomRange (-1.0) 1.0
     pure (x <=> y)
 
+infixl 8 scale as |*|
+
 -- | Get the x-component from a vector.
 getX :: Vector2 -> Number
 getX (x <=> _) = x
@@ -51,3 +53,7 @@ getX (x <=> _) = x
 -- | Get the y-component from a vector.
 getY :: Vector2 -> Number
 getY (_ <=> y) = y
+
+-- | Creates a 2-vector with the x and y components of the same value.
+diagonal :: Number -> Vector2
+diagonal dist = one |*| dist

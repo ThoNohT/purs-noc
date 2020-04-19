@@ -27,3 +27,4 @@ point ctx position radius = do
   _ <- GC.beginPath ctx
   _ <- GC.arc ctx { x: getX position, y: getY position, radius: radius, start: 0.0, end: 2.0 * pi }
   GC.fill ctx
+  GC.stroke ctx
