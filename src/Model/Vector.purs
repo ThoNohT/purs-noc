@@ -10,7 +10,7 @@ import Math as Math
 class
   (Ring v) <= Vector v where
   -- | Scales the vector.
-  scale :: v -> Number -> v
+  scale :: Number -> v -> v
   -- | Returns the magnitude of the vector.
   magnitude :: v -> Number
   -- | Return the dot product of the vector.
@@ -18,7 +18,15 @@ class
   -- | Creates a random vector.
   randomVector :: Effect v
   -- | Scales a vector to the specified magnitude.
-  setMagnitude :: v -> Number -> v
+  setMagnitude :: Number -> v -> v
+
+-- | Normalizes a vector to a unit vector
+normalize :: forall v. Vector v => v -> v
+normalize = setMagnitude 1.0
+
+-- | Flipped version of scale.
+scaleFlipped :: forall v. Vector v => v -> Number -> v
+scaleFlipped = flip scale
 
 infixl 8 dotProduct as <.>
 
@@ -38,16 +46,16 @@ instance ringVector2 :: Ring Vector2 where
   sub (a <=> b) (c <=> d) = (a - c) <=> (b - d)
 
 instance vectorVector2 :: Vector Vector2 where
-  scale (x <=> y) s = (x * s) <=> (y * s)
+  scale s (x <=> y) = (x * s) <=> (y * s)
   dotProduct (a <=> b) (c <=> d) = (a * c) + (c * d)
   magnitude (x <=> y) = Math.sqrt (Math.pow x 2.0 + Math.pow y 2.0)
   randomVector = do
     x <- Random.randomRange (-1.0) 1.0
     y <- Random.randomRange (-1.0) 1.0
-    pure $ setMagnitude (x <=> y) 1.0
-  setMagnitude v mag = scale v (mag / magnitude v)
+    pure $ setMagnitude 1.0 (x <=> y)
+  setMagnitude mag v = scale (mag / magnitude v) v
 
-infixl 8 scale as |*|
+infixl 8 scaleFlipped as |*|
 
 -- | Get the x-component from a vector.
 getX :: Vector2 -> Number
