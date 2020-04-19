@@ -17,6 +17,8 @@ class
   dotProduct :: v -> v -> Number
   -- | Creates a random vector.
   randomVector :: Effect v
+  -- | Scales a vector to the specified magnitude.
+  setMagnitude :: v -> Number -> v
 
 infixl 8 dotProduct as <.>
 
@@ -42,7 +44,8 @@ instance vectorVector2 :: Vector Vector2 where
   randomVector = do
     x <- Random.randomRange (-1.0) 1.0
     y <- Random.randomRange (-1.0) 1.0
-    pure (x <=> y)
+    pure $ setMagnitude (x <=> y) 1.0
+  setMagnitude v mag = scale v (mag / magnitude v)
 
 infixl 8 scale as |*|
 
