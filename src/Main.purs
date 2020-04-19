@@ -7,7 +7,7 @@ import Halogen.VDom.Driver (runUI)
 {-
     Import a specific app here as ActiveApp to run this app.
  -}
-import Apps.NatureOfCode.Vectors2 as ActiveApp
+import Apps.NatureOfCode.MouseMover as ActiveApp
 
 main :: Effect Unit
 main =

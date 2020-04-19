@@ -28,6 +28,10 @@ normalize = setMagnitude 1.0
 scaleFlipped :: forall v. Vector v => v -> Number -> v
 scaleFlipped = flip scale
 
+-- | Limits the magnitude of a vector.
+limit :: forall v. Vector v => Number -> v -> v
+limit maxMag v = if magnitude v > maxMag then setMagnitude maxMag v else v
+
 infixl 8 dotProduct as <.>
 
 -- | A 2-dimensional vector, with an x, and a y component.
@@ -53,7 +57,7 @@ instance vectorVector2 :: Vector Vector2 where
     x <- Random.randomRange (-1.0) 1.0
     y <- Random.randomRange (-1.0) 1.0
     pure $ setMagnitude 1.0 (x <=> y)
-  setMagnitude mag v = scale (mag / magnitude v) v
+  setMagnitude mag v = if magnitude v == 0.0 then v else scale (mag / magnitude v) v
 
 infixl 8 scaleFlipped as |*|
 
