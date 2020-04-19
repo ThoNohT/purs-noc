@@ -18,8 +18,8 @@ canvasSize = 400.0 <=> 400.0
 
 initialize :: G.GraphicsContext -> State -> Effect (Maybe State)
 initialize ctx state = do
-  _ <- G.setCanvasSize ctx canvasSize
-  _ <- G.background ctx "black"
+  G.setCanvasSize ctx canvasSize
+  G.background ctx "black"
   pure Nothing
 
 tick :: State -> Effect (Maybe State)
@@ -35,7 +35,7 @@ tick state = do
 
 render :: G.GraphicsContext -> State -> Effect Unit
 render ctx state = do
-  _ <- G.setFillStyle ctx "#FFFFFF64"
+  G.setFillStyle ctx "#FFFFFF64"
   G.point ctx state 2.0
 
 app :: App.CanvasApp

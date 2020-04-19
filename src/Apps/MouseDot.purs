@@ -22,9 +22,9 @@ initialize ctx state = G.setCanvasSize ctx canvasSize >>= const (pure Nothing)
 -- | Renders a white background, and a red square around the mouse position.
 render :: G.GraphicsContext -> State -> Effect Unit
 render ctx state = do
-  _ <- G.setFillStyle ctx "white"
-  _ <- G.fillRect ctx zero canvasSize
-  _ <- G.setFillStyle ctx "red"
+  G.setFillStyle ctx "white"
+  G.fillRect ctx zero canvasSize
+  G.setFillStyle ctx "red"
   G.fillRect ctx (state - diagonal 8.0) (diagonal 16.0)
 
 -- | Define the main application.

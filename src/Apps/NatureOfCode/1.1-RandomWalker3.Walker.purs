@@ -23,5 +23,5 @@ update walker = do
 -- | Renders the walker to the provided context.
 render :: G.GraphicsContext -> Walker -> Effect Unit
 render ctx walker = do
-  _ <- G.setFillStyle ctx "#FFFFFF64"
+  G.setFillStyle ctx "#FFFFFF64"
   G.point ctx walker 2.0

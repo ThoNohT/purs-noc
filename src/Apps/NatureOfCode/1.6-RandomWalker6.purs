@@ -18,7 +18,7 @@ canvasSize = 400.0 <=> 400.0
 
 initialize :: G.GraphicsContext -> State -> Effect (Maybe State)
 initialize ctx state = do
-  _ <- G.setCanvasSize ctx canvasSize
+  G.setCanvasSize ctx canvasSize
   velocity <- randomVector
   velFactor <- Random.randomRange 0.0 3.0
   pure $ Just $ state { vel = velocity |*| velFactor }
@@ -34,10 +34,10 @@ tick state = do
 
 render :: G.GraphicsContext -> State -> Effect Unit
 render ctx state = do
-  _ <- G.background ctx "black"
-  _ <- G.setFillStyle ctx "#FFFFFF64"
-  _ <- G.setStrokeStyle ctx "white"
-  _ <- G.setStrokeWidth ctx 2.0
+  G.background ctx "black"
+  G.setFillStyle ctx "#FFFFFF64"
+  G.setStrokeStyle ctx "white"
+  G.setStrokeWidth ctx 2.0
   G.point ctx state.pos 16.0
 
 app :: App.CanvasApp

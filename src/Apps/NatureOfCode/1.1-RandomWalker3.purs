@@ -19,8 +19,8 @@ canvasSize = 400.0 <=> 400.0
 
 initialize :: G.GraphicsContext -> State -> Effect (Maybe State)
 initialize ctx state = do
-  _ <- G.setCanvasSize ctx canvasSize
-  _ <- G.background ctx "black"
+  G.setCanvasSize ctx canvasSize
+  G.background ctx "black"
   pure Nothing
 
 tick :: State -> Effect (Maybe State)

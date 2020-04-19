@@ -16,9 +16,9 @@ canvasSize = 400.0 <=> 400.0
 
 initialize :: G.GraphicsContext -> State -> Effect (Maybe State)
 initialize ctx _ = do
-  _ <- G.setCanvasSize ctx canvasSize
-  _ <- G.background ctx "black"
-  _ <- G.translate ctx $ canvasSize |/| 2.0
+  G.setCanvasSize ctx canvasSize
+  G.background ctx "black"
+  G.translate ctx $ canvasSize |/| 2.0
   pure Nothing
 
 tick :: State -> Effect (Maybe State)
@@ -28,8 +28,8 @@ tick state = do
 
 render :: G.GraphicsContext -> State -> Effect Unit
 render ctx state = do
-  _ <- G.setStrokeStyle ctx "white"
-  _ <- G.setStrokeWidth ctx 4.0
+  G.setStrokeStyle ctx "white"
+  G.setStrokeWidth ctx 4.0
   G.line ctx zero state
 
 app :: App.CanvasApp

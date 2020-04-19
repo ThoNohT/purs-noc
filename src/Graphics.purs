@@ -99,10 +99,10 @@ scale ctx factor = GC.scale (context ctx) { scaleX: getX factor, scaleY: getY fa
 background :: GraphicsContext -> String -> Effect Unit
 background ctx style = do
   oldTransform <- getTransform ctx
-  _ <- resetTransform ctx
+  resetTransform ctx
   dimensions <- getCanvasSize ctx
-  _ <- GC.setFillStyle (context ctx) style -- TODO: Find a way to reset the fill style.
-  _ <- fillRect ctx zero dimensions
+  GC.setFillStyle (context ctx) style -- TODO: Find a way to reset the fill style.
+  fillRect ctx zero dimensions
   GC.setTransform (context ctx) oldTransform
 
 -- | Fills the specified area with the specified style.
@@ -113,15 +113,15 @@ fillRect ctx base size = do
 -- | Draws a point at the specified location, with the specified radius.
 point :: GraphicsContext -> Vector2 -> Number -> Effect Unit
 point ctx position radius = do
-  _ <- GC.beginPath $ context ctx
-  _ <- GC.arc (context ctx) { x: getX position, y: getY position, radius: radius, start: 0.0, end: 2.0 * pi }
+  GC.beginPath $ context ctx
+  GC.arc (context ctx) { x: getX position, y: getY position, radius: radius, start: 0.0, end: 2.0 * pi }
   GC.fill $ context ctx
   GC.stroke $ context ctx
 
 -- | Draws a line from the specified location to the specified location.
 line :: GraphicsContext -> Vector2 -> Vector2 -> Effect Unit
 line ctx from to = do
-  _ <- GC.beginPath (context ctx)
-  _ <- GC.moveTo (context ctx) (getX from) (getY from)
-  _ <- GC.lineTo (context ctx) (getX to) (getY to)
+  GC.beginPath (context ctx)
+  GC.moveTo (context ctx) (getX from) (getY from)
+  GC.lineTo (context ctx) (getX to) (getY to)
   GC.stroke (context ctx)

@@ -17,8 +17,8 @@ canvasSize = 400.0 <=> 400.0
 
 initialize :: G.GraphicsContext -> State -> Effect (Maybe State)
 initialize ctx _ = do
-  _ <- G.setCanvasSize ctx canvasSize
-  _ <- G.translate ctx $ canvasSize |/| 2.0
+  G.setCanvasSize ctx canvasSize
+  G.translate ctx $ canvasSize |/| 2.0
   pure Nothing
 
 tick :: State -> Effect (Maybe State)
@@ -32,11 +32,11 @@ handleMouse mouse state = case mouse.event of
 
 render :: G.GraphicsContext -> State -> Effect Unit
 render ctx state = do
-  _ <- G.background ctx "black"
+  G.background ctx "black"
   let
     v = state - (200.0 <=> 200.0) # setMagnitude 50.0
-  _ <- G.setStrokeStyle ctx "white"
-  _ <- G.setStrokeWidth ctx 2.0
+  G.setStrokeStyle ctx "white"
+  G.setStrokeWidth ctx 2.0
   G.line ctx zero v
 
 app :: App.CanvasApp
