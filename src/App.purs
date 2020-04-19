@@ -17,6 +17,7 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.Query.EventSource as ES
 import Model.Events (KeyData, KeyEvent(..), MouseButton(..), MouseData, MouseEvent(..))
+import Model.Vector ((<=>))
 import Partial.Unsafe (unsafePartial)
 import Web.DOM.NonElementParentNode as NEPN
 import Web.HTML (window) as Web
@@ -26,7 +27,6 @@ import Web.HTML.Window (document) as Web
 import Web.HTML.Window as Window
 import Web.UIEvent.KeyboardEvent as KE
 import Web.UIEvent.MouseEvent as ME
-import Model.Vector ((<=>))
 
 -- App specification --
 type CanvasApp
@@ -37,7 +37,7 @@ type CanvasAppSpec state
     , tick :: state -> Effect (Maybe state)
     , handleKeyboard :: KeyData -> state -> Effect (Maybe state)
     , handleMouse :: MouseData -> state -> Effect (Maybe state)
-    , initialize :: CV.CanvasElement -> state -> Effect Unit
+    , initialize :: CV.CanvasElement -> state -> Effect (Maybe state)
     , render :: CV.Context2D -> state -> Effect Unit
     , updateInterval :: Int
     }
@@ -56,7 +56,7 @@ defaultAppSpec initialState =
   , handleKeyboard: const2 $ pure Nothing
   , handleMouse: const2 $ pure Nothing
   , render: const2 (pure unit)
-  , initialize: const2 (pure unit)
+  , initialize: const2 (pure Nothing)
   , updateInterval: 33
   }
 
@@ -90,9 +90,8 @@ update appSpec = case _ of
     H.liftEffect $ focusElement "render-canvas"
     canvas <- H.liftEffect $ unsafePartial fromJust <$> CV.getCanvasElementById "render-canvas"
     context <- H.liftEffect $ CV.getContext2D canvas
-    currentState <- HS.get
-    HS.put $ currentState { context = Just context }
-    H.liftEffect $ appSpec.initialize canvas currentState.state
+    HS.modify_ $ \s -> s { context = Just context }
+    mapState $ appSpec.initialize canvas
   Tick -> mapState $ appSpec.tick
   Keyboard kbData -> mapState $ appSpec.handleKeyboard kbData
   Mouse mouseData -> mapState $ appSpec.handleMouse mouseData

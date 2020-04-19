@@ -16,8 +16,8 @@ canvasSize :: GC.Dimensions
 canvasSize = { width: 1024.0, height: 768.0 }
 
 -- | Sets the canvas to the desired size.
-initialize :: GC.CanvasElement -> State -> Effect Unit
-initialize canvas state = GC.setCanvasDimensions canvas canvasSize
+initialize :: GC.CanvasElement -> State -> Effect (Maybe State)
+initialize canvas state = GC.setCanvasDimensions canvas canvasSize >>= const (pure Nothing)
 
 -- | Renders a white background, and a red square around the mouse position.
 render :: GC.Context2D -> State -> Effect Unit

@@ -4,12 +4,13 @@
 module Apps.NatureOfCode.RandomWalker3 (app) where
 
 import Prelude
+
 import App as App
+import Apps.NatureOfCode.Randomwalker3.Walker as Walker
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
-import Graphics.Canvas as GC
-import Apps.NatureOfCode.Randomwalker3.Walker as Walker
 import Graphics (background)
+import Graphics.Canvas as GC
 
 -- | The state just contains the location of the mouse.
 type State
@@ -20,10 +21,11 @@ canvasSize :: GC.Dimensions
 canvasSize = { width: 400.0, height: 400.0 }
 
 -- | Sets the canvas to the desired size.
-initialize :: GC.CanvasElement -> State -> Effect Unit
+initialize :: GC.CanvasElement -> State -> Effect (Maybe State)
 initialize canvas state = do
   _ <- GC.setCanvasDimensions canvas canvasSize
-  background canvas "black"
+  _ <- background canvas "black"
+  pure Nothing
 
 tick :: State -> Effect (Maybe State)
 tick state = do

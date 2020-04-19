@@ -20,9 +20,8 @@ canvasSize :: GC.Dimensions
 canvasSize = { width: 400.0, height: 400.0 }
 
 -- | Sets the canvas to the desired size.
-initialize :: GC.CanvasElement -> State -> Effect Unit
-initialize canvas state = do
-  GC.setCanvasDimensions canvas canvasSize
+initialize :: GC.CanvasElement -> State -> Effect (Maybe State)
+initialize canvas state = GC.setCanvasDimensions canvas canvasSize >>= const (pure Nothing)
 
 tick :: State -> Effect (Maybe State)
 tick state = do
