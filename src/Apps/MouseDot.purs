@@ -4,28 +4,28 @@ import Prelude
 import App as App
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
-import Graphics.Canvas as GC
-import Model.Vector (Vector2, getX, getY, (<=>))
+import Graphics as G
+import Model.Vector (Vector2, (<=>), diagonal)
 
 -- | The state just contains the location of the mouse.
 type State
   = Vector2
 
 -- | This value is used to set and get the canvas size everywhere  else.
-canvasSize :: GC.Dimensions
-canvasSize = { width: 1024.0, height: 768.0 }
+canvasSize :: Vector2
+canvasSize = 1024.0 <=> 768.0
 
 -- | Sets the canvas to the desired size.
-initialize :: GC.CanvasElement -> State -> Effect (Maybe State)
-initialize canvas state = GC.setCanvasDimensions canvas canvasSize >>= const (pure Nothing)
+initialize :: G.GraphicsContext -> State -> Effect (Maybe State)
+initialize ctx state = G.setCanvasSize ctx canvasSize >>= const (pure Nothing)
 
 -- | Renders a white background, and a red square around the mouse position.
-render :: GC.Context2D -> State -> Effect Unit
+render :: G.GraphicsContext -> State -> Effect Unit
 render ctx state = do
-  _ <- GC.setFillStyle ctx "white"
-  _ <- GC.fillRect ctx { width: canvasSize.width, height: canvasSize.height, x: 0.0, y: 0.0 }
-  _ <- GC.setFillStyle ctx "red"
-  GC.fillRect ctx { width: 16.0, height: 16.0, x: getX state - 8.0, y: getY state - 8.0 }
+  _ <- G.setFillStyle ctx "white"
+  _ <- G.fillRect ctx zero canvasSize
+  _ <- G.setFillStyle ctx "red"
+  G.fillRect ctx (state - diagonal 8.0) (diagonal 16.0)
 
 -- | Define the main application.
 app :: App.CanvasApp

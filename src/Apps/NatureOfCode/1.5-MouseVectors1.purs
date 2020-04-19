@@ -2,28 +2,26 @@
 module Apps.NatureOfCode.MouseVectors1 (app) where
 
 import Prelude
-
 import App as App
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
-import Graphics (background, line, resetTransform)
-import Graphics.Canvas as GC
+import Graphics as G
 import Model.Events (MouseEvent(..), MouseData)
-import Model.Vector (Vector2, (<=>))
+import Model.Vector (Vector2, (<=>), (|/|))
 
 -- | The state just contains the location of the mouse.
 type State
   = Vector2
 
 -- | This value is used to set and get the canvas size everywhere  else.
-canvasSize :: GC.Dimensions
-canvasSize = { width: 400.0, height: 400.0 }
+canvasSize :: Vector2
+canvasSize = 400.0 <=> 400.0
 
 -- | Sets the canvas to the desired size.
-initialize :: GC.CanvasElement -> State -> Effect (Maybe State)
-initialize canvas _ = do
-  _ <- GC.setCanvasDimensions canvas canvasSize
-  _ <- background canvas "black"
+initialize :: G.GraphicsContext -> State -> Effect (Maybe State)
+initialize ctx _ = do
+  _ <- G.setCanvasSize ctx canvasSize
+  _ <- G.background ctx "black"
   pure Nothing
 
 tick :: State -> Effect (Maybe State)
@@ -36,16 +34,15 @@ handleMouse mouse state = case mouse.event of
   _ -> pure Nothing
 
 -- | Renders a white background, and a red square around the mouse position.
-render :: GC.Context2D -> State -> Effect Unit
+render :: G.GraphicsContext -> State -> Effect Unit
 render ctx state = do
-  _ <- resetTransform ctx
-  _ <- GC.translate ctx { translateX: canvasSize.width / 2.0, translateY: canvasSize.height / 2.0 }
-
-  let v = state - (200.0 <=> 200.0)
-
-  _ <- GC.setStrokeStyle ctx "#FFFFFF64"
-  _ <- GC.setLineWidth ctx 2.0
-  line ctx zero v
+  _ <- G.resetTransform ctx
+  _ <- G.translate ctx $ canvasSize |/| 2.0
+  let
+    v = state - (200.0 <=> 200.0)
+  _ <- G.setStrokeStyle ctx "#FFFFFF64"
+  _ <- G.setStrokeWidth ctx 2.0
+  G.line ctx zero v
 
 -- | Define the main application.
 app :: App.CanvasApp

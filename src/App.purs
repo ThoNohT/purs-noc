@@ -10,7 +10,7 @@ import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Timer as Timer
-import Graphics.Canvas as CV
+import Graphics (GraphicsContext, makeContextForElement)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
@@ -37,8 +37,8 @@ type CanvasAppSpec state
     , tick :: state -> Effect (Maybe state)
     , handleKeyboard :: KeyData -> state -> Effect (Maybe state)
     , handleMouse :: MouseData -> state -> Effect (Maybe state)
-    , initialize :: CV.CanvasElement -> state -> Effect (Maybe state)
-    , render :: CV.Context2D -> state -> Effect Unit
+    , initialize :: GraphicsContext -> state -> Effect (Maybe state)
+    , render :: GraphicsContext -> state -> Effect Unit
     , updateInterval :: Int
     }
 
@@ -62,7 +62,7 @@ defaultAppSpec initialState =
 
 -- Component implementation --
 type ComponentState state
-  = { changed :: Boolean, state :: state, context :: Maybe CV.Context2D }
+  = { changed :: Boolean, state :: state, context :: Maybe GraphicsContext }
 
 view :: H.ComponentHTML Action () Aff
 view =
@@ -88,10 +88,9 @@ update appSpec = case _ of
     _ <- H.subscribe $ tickSource appSpec.updateInterval
     _ <- H.subscribe $ renderSource
     H.liftEffect $ focusElement "render-canvas"
-    canvas <- H.liftEffect $ unsafePartial fromJust <$> CV.getCanvasElementById "render-canvas"
-    context <- H.liftEffect $ CV.getContext2D canvas
-    HS.modify_ $ \s -> s { context = Just context }
-    mapState $ appSpec.initialize canvas
+    ctx <- H.liftEffect $ makeContextForElement "render-canvas"
+    HS.modify_ $ \s -> s { context = Just ctx }
+    mapState $ appSpec.initialize ctx
   Tick -> mapState $ appSpec.tick
   Keyboard kbData -> mapState $ appSpec.handleKeyboard kbData
   Mouse mouseData -> mapState $ appSpec.handleMouse mouseData

@@ -8,7 +8,7 @@ import Math as Math
 
 -- | Defines all available operations on vectors.
 class
-  (Ring v) <= Vector v where
+  (Ring v, Show v) <= Vector v where
   -- | Scales the vector.
   scale :: Number -> v -> v
   -- | Returns the magnitude of the vector.
@@ -28,6 +28,14 @@ normalize = setMagnitude 1.0
 scaleFlipped :: forall v. Vector v => v -> Number -> v
 scaleFlipped = flip scale
 
+infixl 8 scaleFlipped as |*|
+
+-- | Inverted version of scaleFlipped.
+invScaleFlipped :: forall v. Vector v => v -> Number -> v
+invScaleFlipped v scale = scaleFlipped v (1.0 / scale)
+
+infixl 8 invScaleFlipped as |/|
+
 -- | Limits the magnitude of a vector.
 limit :: forall v. Vector v => Number -> v -> v
 limit maxMag v = if magnitude v > maxMag then setMagnitude maxMag v else v
@@ -39,6 +47,9 @@ data Vector2
   = Vector2 Number Number
 
 infix 7 Vector2 as <=>
+
+instance showVector2 :: Show Vector2 where
+  show v = show (getX v) <> " <=> " <> show (getY v)
 
 instance semiringVector2 :: Semiring Vector2 where
   add (a <=> b) (c <=> d) = (a + c) <=> (b + d)
@@ -58,8 +69,6 @@ instance vectorVector2 :: Vector Vector2 where
     y <- Random.randomRange (-1.0) 1.0
     pure $ setMagnitude 1.0 (x <=> y)
   setMagnitude mag v = if magnitude v == 0.0 then v else scale (mag / magnitude v) v
-
-infixl 8 scaleFlipped as |*|
 
 -- | Get the x-component from a vector.
 getX :: Vector2 -> Number
