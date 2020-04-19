@@ -1,14 +1,14 @@
 -- | Implements a random walker, as the second modification in https://www.youtube.com/watch?v=bKEaK7WNLzM.
 -- | Except for using a class, this walker is a module. I'm also not sure if I will be continuing this style in the
 -- | Future, as this is not object oriented programming.
-module Apps.RandomWalker3 (app) where
+module Apps.NatureOfCode.RandomWalker3 (app) where
 
 import Prelude
 import App as App
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Graphics.Canvas as GC
-import Apps.Randomwalker3.Walker as Walker
+import Apps.NatureOfCode.Randomwalker3.Walker as Walker
 import Graphics (background)
 
 -- | The state just contains the location of the mouse.

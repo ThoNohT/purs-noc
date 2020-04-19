@@ -1,5 +1,5 @@
 -- | A module implementation of the Walker class in https://www.youtube.com/watch?v=bKEaK7WNLzM.
-module Apps.Randomwalker3.Walker where
+module Apps.NatureOfCode.Randomwalker3.Walker where
 
 import Prelude
 import Effect (Effect)

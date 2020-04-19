@@ -1,6 +1,6 @@
 -- | Implements a random walker, as from the beginning of https://www.youtube.com/watch?v=bKEaK7WNLzM.
 -- | Except since I am using state, the 'Vector' class here is already a point.
-module Apps.RandomWalker1 (app) where
+module Apps.NatureOfCode.RandomWalker1 (app) where
 
 import Prelude
 import App as App

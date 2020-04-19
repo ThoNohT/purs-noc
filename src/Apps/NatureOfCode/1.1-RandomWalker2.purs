@@ -1,5 +1,5 @@
 -- | Implements a random walker, as the first modification in https://www.youtube.com/watch?v=bKEaK7WNLzM.
-module Apps.RandomWalker2 (app) where
+module Apps.NatureOfCode.RandomWalker2 (app) where
 
 import Prelude
 import App as App
