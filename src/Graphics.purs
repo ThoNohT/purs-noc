@@ -126,17 +126,17 @@ fillRect :: GraphicsContext -> Vector2 -> Vector2 -> Effect Unit
 fillRect ctx base size = do
   GC.fillRect (context ctx) { x: getX base, y: getY base, width: getX size, height: getY size }
 
--- | Draws a circle at the specified location, with the specified diameter.
+-- | Draws a circle at the specified location, with the specified size.
 ellipse :: GraphicsContext -> Vector2 -> Vector2 -> Effect Unit
 ellipse ctx position size = do
   GC.beginPath $ context ctx
-  ellipse_ (context ctx) (getX position) (getY position) ((getX size) / 2.0) ((getY size) / 2.0) 0.0 0.0 (2.0 * pi) false
+  ellipse_ (context ctx) (getX position) (getY position) (getX size) (getY size) 0.0 0.0 (2.0 * pi) false
   GC.fill $ context ctx
   GC.stroke $ context ctx
 
--- | Draws a circle at the specified location, with the specified diameter.
+-- | Draws a circle at the specified location, with the specified radius.
 circle :: GraphicsContext -> Vector2 -> Number -> Effect Unit
-circle ctx position diameter = ellipse ctx position (diagonal diameter)
+circle ctx position radius = ellipse ctx position (diagonal radius)
 
 -- | Draws a line from the specified location to the specified location.
 line :: GraphicsContext -> Vector2 -> Vector2 -> Effect Unit
