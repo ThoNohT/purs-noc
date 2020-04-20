@@ -8,7 +8,7 @@ import Math as Math
 
 -- | Defines all available operations on vectors.
 class
-  (Ring v, Show v) <= Vector v where
+  (CommutativeRing v, Show v) <= Vector v where
   -- | Scales the vector.
   scale :: Number -> v -> v
   -- | Returns the magnitude of the vector.
@@ -59,6 +59,8 @@ instance semiringVector2 :: Semiring Vector2 where
 
 instance ringVector2 :: Ring Vector2 where
   sub (a <=> b) (c <=> d) = (a - c) <=> (b - d)
+
+instance commutativeRingVector2 :: CommutativeRing Vector2
 
 instance vectorVector2 :: Vector Vector2 where
   scale s (x <=> y) = (x * s) <=> (y * s)
