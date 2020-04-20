@@ -7,7 +7,7 @@ import Halogen.VDom.Driver (runUI)
 {-
     Import a specific app here as ActiveApp to run this app.
  -}
-import Apps.NatureOfCode.ApplyForce as ActiveApp
+import Apps.NatureOfCode.ForceWithMass as ActiveApp
 
 main :: Effect Unit
 main =
