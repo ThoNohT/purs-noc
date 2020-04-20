@@ -80,6 +80,14 @@ getX (x <=> _) = x
 getY :: Vector2 -> Number
 getY (_ <=> y) = y
 
+-- | Set the x-component of a vector.
+setX :: Number -> Vector2 -> Vector2
+setX x (_ <=> y) = x <=> y
+
+-- | Set the y-component of a vector.
+setY :: Number -> Vector2 -> Vector2
+setY y (x <=> _) = x <=> y
+
 -- | Creates a 2-vector with the x and y components of the same value.
 diagonal :: Number -> Vector2
 diagonal dist = one |*| dist
