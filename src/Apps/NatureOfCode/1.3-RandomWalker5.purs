@@ -33,7 +33,7 @@ render ctx state = do
   G.setFillStyle ctx "#FFFFFF64"
   G.setStrokeStyle ctx "white"
   G.setStrokeWidth ctx 2.0
-  G.point ctx state.pos 16.0
+  G.circle ctx state.pos 32.0
 
 app :: App.CanvasApp
 app =

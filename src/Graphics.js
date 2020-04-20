@@ -29,3 +29,25 @@ exports.getStrokeWidth_ = function(context) {
         return context.lineWidth;
     }
 };
+
+exports.ellipse_ = function(context) {
+    return function(x) {
+        return function(y) {
+            return function(radiusX) {
+                return function(radiusY) {
+                    return function(rotation) {
+                        return function(startAngle) {
+                            return function(endAngle) {
+                                return function(anticlockwise) {
+                                    return function() {
+                                        context.ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

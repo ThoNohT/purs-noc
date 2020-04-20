@@ -24,4 +24,4 @@ update walker = do
 render :: G.GraphicsContext -> Walker -> Effect Unit
 render ctx walker = do
   G.setFillStyle ctx "#FFFFFF64"
-  G.point ctx walker 2.0
+  G.circle ctx walker 4.0

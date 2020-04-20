@@ -14,7 +14,8 @@ module Graphics
   , background
   , fillRect
   , makeContextForElement
-  , point
+  , circle
+  , ellipse
   , line
   ) where
 
@@ -23,7 +24,7 @@ import Data.Maybe (fromJust)
 import Effect (Effect)
 import Graphics.Canvas as GC
 import Math (pi)
-import Model.Vector (Vector2, getX, getY, (<=>))
+import Model.Vector (Vector2, diagonal, getX, getY, (<=>))
 import Partial.Unsafe (unsafePartial)
 
 {- Context -}
@@ -125,13 +126,17 @@ fillRect :: GraphicsContext -> Vector2 -> Vector2 -> Effect Unit
 fillRect ctx base size = do
   GC.fillRect (context ctx) { x: getX base, y: getY base, width: getX size, height: getY size }
 
--- | Draws a point at the specified location, with the specified radius.
-point :: GraphicsContext -> Vector2 -> Number -> Effect Unit
-point ctx position radius = do
+-- | Draws a circle at the specified location, with the specified diameter.
+ellipse :: GraphicsContext -> Vector2 -> Vector2 -> Effect Unit
+ellipse ctx position size = do
   GC.beginPath $ context ctx
-  GC.arc (context ctx) { x: getX position, y: getY position, radius: radius, start: 0.0, end: 2.0 * pi }
+  ellipse_ (context ctx) (getX position) (getY position) ((getX size) / 2.0) ((getY size) / 2.0) 0.0 0.0 (2.0 * pi) false
   GC.fill $ context ctx
   GC.stroke $ context ctx
+
+-- | Draws a circle at the specified location, with the specified diameter.
+circle :: GraphicsContext -> Vector2 -> Number -> Effect Unit
+circle ctx position diameter = ellipse ctx position (diagonal diameter)
 
 -- | Draws a line from the specified location to the specified location.
 line :: GraphicsContext -> Vector2 -> Vector2 -> Effect Unit
@@ -153,3 +158,6 @@ foreign import getStrokeStyle_ :: GC.Context2D -> Effect String
 
 -- | Gets the current stroke width.
 foreign import getStrokeWidth_ :: GC.Context2D -> Effect Number
+
+-- | Traces an ellipse path. ctx -> x -> y -> radiusX -> radiusY -> rotation -> startAngle -> endAngle -> antiClockwise
+foreign import ellipse_ :: GC.Context2D -> Number -> Number -> Number -> Number -> Number -> Number -> Number -> Boolean -> Effect Unit

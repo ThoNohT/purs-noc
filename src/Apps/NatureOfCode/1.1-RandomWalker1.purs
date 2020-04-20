@@ -36,7 +36,7 @@ tick state = do
 render :: G.GraphicsContext -> State -> Effect Unit
 render ctx state = do
   G.setFillStyle ctx "#FFFFFF64"
-  G.point ctx state 2.0
+  G.circle ctx state 4.0
 
 app :: App.CanvasApp
 app =
