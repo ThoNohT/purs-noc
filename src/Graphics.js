@@ -11,3 +11,21 @@ exports.getTransform_ = function(context) {
         }
     }
 };
+
+exports.getFillStyle_ = function(context) {
+    return function() {
+        return context.fillStyle;
+    }
+};
+
+exports.getStrokeStyle_ = function(context) {
+    return function() {
+        return context.strokeStyle;
+    }
+};
+
+exports.getStrokeWidth_ = function(context) {
+    return function() {
+        return context.lineWidth;
+    }
+};

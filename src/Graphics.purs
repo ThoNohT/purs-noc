@@ -58,22 +58,31 @@ setCanvasSize :: GraphicsContext -> Vector2 -> Effect Unit
 setCanvasSize ctx size = GC.setCanvasDimensions (canvas ctx) { width: getX size, height: getY size }
 
 {- Styling -}
--- | Sets the current  fill style.
+-- | Sets the current fill style.
 setFillStyle :: GraphicsContext -> String -> Effect Unit
 setFillStyle ctx style = GC.setFillStyle (context ctx) style
+
+-- | Gets the current fill style.
+getFillStyle :: GraphicsContext -> Effect String
+getFillStyle ctx = getFillStyle_ (context ctx)
 
 -- | Sets the current stroke style.
 setStrokeStyle :: GraphicsContext -> String -> Effect Unit
 setStrokeStyle ctx style = GC.setStrokeStyle (context ctx) style
 
+-- | Gets the current stroke style.
+getStrokeStyle :: GraphicsContext -> Effect String
+getStrokeStyle ctx = getStrokeStyle_ (context ctx)
+
 -- | Sets the current stroke width.
 setStrokeWidth :: GraphicsContext -> Number -> Effect Unit
 setStrokeWidth ctx width = GC.setLineWidth (context ctx) width
 
-{- Transforms -}
--- Gets the current transform
-foreign import getTransform_ :: GC.Context2D -> Effect GC.Transform
+-- | Gets the current stroke width.
+getStrokeWidth :: GraphicsContext -> Effect Number
+getStrokeWidth ctx = getStrokeWidth_ (context ctx)
 
+{- Transforms -}
 -- | Returns the current transform.
 getTransform :: GraphicsContext -> Effect GC.Transform
 getTransform ctx = getTransform_ (context ctx)
@@ -98,12 +107,18 @@ scale ctx factor = GC.scale (context ctx) { scaleX: getX factor, scaleY: getY fa
 -- | Draws the entire canvas with the specified style.
 background :: GraphicsContext -> String -> Effect Unit
 background ctx style = do
+  -- Back-up old style/transform.
   oldTransform <- getTransform ctx
+  oldFillStyle <- getFillStyle ctx
+  -- Setup canvas.
   resetTransform ctx
   dimensions <- getCanvasSize ctx
-  GC.setFillStyle (context ctx) style -- TODO: Find a way to reset the fill style.
+  GC.setFillStyle (context ctx) style
+  -- Fill.
   fillRect ctx zero dimensions
-  GC.setTransform (context ctx) oldTransform
+  -- Revert style/transform.
+  setFillStyle ctx oldFillStyle
+  setTransform ctx oldTransform
 
 -- | Fills the specified area with the specified style.
 fillRect :: GraphicsContext -> Vector2 -> Vector2 -> Effect Unit
@@ -125,3 +140,16 @@ line ctx from to = do
   GC.moveTo (context ctx) (getX from) (getY from)
   GC.lineTo (context ctx) (getX to) (getY to)
   GC.stroke (context ctx)
+
+{- Foreign imports -}
+-- | Gets the current transform.
+foreign import getTransform_ :: GC.Context2D -> Effect GC.Transform
+
+-- | Gets the current fill style.
+foreign import getFillStyle_ :: GC.Context2D -> Effect String
+
+-- | Gets the current stroke style.
+foreign import getStrokeStyle_ :: GC.Context2D -> Effect String
+
+-- | Gets the current stroke width.
+foreign import getStrokeWidth_ :: GC.Context2D -> Effect Number
