@@ -37,5 +37,4 @@ app =
         { initialize = initialize
         , render = render
         , tick = tick
-        , updateInterval = 33
         }

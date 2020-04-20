@@ -21,10 +21,6 @@ initialize ctx _ = do
   G.translate ctx $ canvasSize |/| 2.0
   pure Nothing
 
-tick :: State -> Effect (Maybe State)
-tick state = do
-  pure Nothing
-
 handleMouse :: MouseData -> State -> Effect (Maybe State)
 handleMouse mouse state = case mouse.event of
   MouseMove -> pure $ Just mouse.location
@@ -45,7 +41,5 @@ app =
     $ (App.defaultAppSpec zero)
         { initialize = initialize
         , render = render
-        , tick = tick
-        , updateInterval = 33
         , handleMouse = handleMouse
         }
