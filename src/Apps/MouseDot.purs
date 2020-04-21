@@ -17,13 +17,14 @@ canvasSize = 1024.0 <=> 768.0
 -- | Sets the canvas to the desired size.
 initialize :: State -> CanvasRuntime (Maybe State)
 initialize state = do
-  G.setCanvasSize canvasSize >>= const (pure Nothing)
+  G.setCanvasSize canvasSize
+  G.background "white"
+  pure Nothing
 
 -- | Renders a white background, and a red square around the mouse position.
 render :: State -> CanvasRuntime Unit
 render state = do
-  G.setFillStyle "white"
-  G.fillRect zero canvasSize
+  G.background "white"
   G.setFillStyle "red"
   G.fillRect (state - diagonal 8.0) (diagonal 16.0)
 
