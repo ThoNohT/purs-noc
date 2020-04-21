@@ -17,6 +17,8 @@ type CanvasApp state
     , updateInterval :: Int
     }
 
+-- | A default canvas app, that does nothing. Override individual properties of this specification to add behaviour to
+-- | an app without having to always define the entire application.
 defaultApp :: forall state. state -> CanvasApp state
 defaultApp initialState =
   { initialState: initialState
