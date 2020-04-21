@@ -1,4 +1,4 @@
-module App (CanvasApp, app, defaultAppSpec) where
+module App (create) where
 
 import Prelude
 import Control.Monad.State as HS
@@ -18,6 +18,7 @@ import Halogen.HTML.Properties as HP
 import Halogen.Query.EventSource as ES
 import Model.Events (KeyData, KeyEvent(..), MouseButton(..), MouseData, MouseEvent(..))
 import Model.Vector ((<=>))
+import Types (CanvasApp)
 import Partial.Unsafe (unsafePartial)
 import Web.DOM.NonElementParentNode as NEPN
 import Web.HTML (window) as Web
@@ -29,36 +30,12 @@ import Web.UIEvent.KeyboardEvent as KE
 import Web.UIEvent.MouseEvent as ME
 
 -- App specification --
-type CanvasApp
-  = H.Component HH.HTML (Const Void) Unit Void Aff
-
-type CanvasAppSpec state
-  = { initialState :: state
-    , tick :: state -> Effect (Maybe state)
-    , handleKeyboard :: KeyData -> state -> Effect (Maybe state)
-    , handleMouse :: MouseData -> state -> Effect (Maybe state)
-    , initialize :: GraphicsContext -> state -> Effect (Maybe state)
-    , render :: GraphicsContext -> state -> Effect Unit
-    , updateInterval :: Int
-    }
-
 data Action
   = Init
   | Tick
   | Keyboard KeyData
   | Mouse MouseData
   | Render (ES.Emitter Effect Action)
-
-defaultAppSpec :: forall state. state -> CanvasAppSpec state
-defaultAppSpec initialState =
-  { initialState: initialState
-  , tick: const $ pure Nothing
-  , handleKeyboard: const2 $ pure Nothing
-  , handleMouse: const2 $ pure Nothing
-  , render: const2 (pure unit)
-  , initialize: const2 (pure Nothing)
-  , updateInterval: 33
-  }
 
 -- Component implementation --
 type ComponentState state
@@ -80,7 +57,7 @@ view =
 
 update ::
   forall state.
-  CanvasAppSpec state ->
+  CanvasApp state ->
   Action ->
   H.HalogenM (ComponentState state) Action () Void Aff Unit
 update appSpec = case _ of
@@ -108,20 +85,13 @@ update appSpec = case _ of
           _ <- H.liftEffect $ Window.requestAnimationFrame passRender window
           pure unit
 
-app ::
-  forall state.
-  CanvasAppSpec state ->
-  H.Component HH.HTML (Const Void) Unit Void Aff
-app appSpec = do
+create :: forall state. CanvasApp state -> H.Component HH.HTML (Const Void) Unit Void Aff
+create appSpec = do
   H.mkComponent
     { initialState: const { changed: false, state: appSpec.initialState, context: Nothing }
     , render: const view
     , eval: H.mkEval $ H.defaultEval { handleAction = update appSpec, initialize = Just Init }
     }
-
--- Helpers --
-const2 :: forall a b c. a -> b -> c -> a
-const2 a _ _ = a
 
 toKeyData :: KeyEvent -> KE.KeyboardEvent -> KeyData
 toKeyData eventType event =

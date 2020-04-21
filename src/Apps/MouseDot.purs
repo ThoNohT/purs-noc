@@ -1,7 +1,7 @@
 module Apps.MouseDot (app) where
 
 import Prelude
-import App as App
+import Toolkit (CanvasApp, defaultApp)
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Graphics as G
@@ -28,12 +28,11 @@ render ctx state = do
   G.fillRect ctx (state - diagonal 8.0) (diagonal 16.0)
 
 -- | Define the main application.
-app :: App.CanvasApp
+app :: CanvasApp State
 app =
-  App.app
-    $ (App.defaultAppSpec (0.0 <=> 0.0))
-        { initialize = initialize
-        , render = render
-        , updateInterval = 10000
-        , handleMouse = \e _ -> pure $ Just e.location
-        }
+  (defaultApp (0.0 <=> 0.0))
+    { initialize = initialize
+    , render = render
+    , updateInterval = 10000
+    , handleMouse = \e _ -> pure $ Just e.location
+    }
