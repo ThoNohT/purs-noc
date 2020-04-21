@@ -18,7 +18,7 @@ import Halogen.HTML.Properties as HP
 import Halogen.Query.EventSource as ES
 import Model.Events (KeyData, KeyEvent(..), MouseButton(..), MouseData, MouseEvent(..))
 import Model.Vector ((<=>))
-import Types (CanvasApp)
+import Toolkit (CanvasApp)
 import Partial.Unsafe (unsafePartial)
 import Web.DOM.NonElementParentNode as NEPN
 import Web.HTML (window) as Web
