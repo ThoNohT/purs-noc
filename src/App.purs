@@ -64,7 +64,7 @@ view =
 type AppM state
   = H.HalogenM (ComponentState state) Action () Void Aff
 
-update :: forall state. CanvasApp GraphicsContext state -> Action -> AppM state Unit
+update :: forall state. CanvasApp state -> Action -> AppM state Unit
 update appSpec = case _ of
   Init -> do
     _ <- H.subscribe $ tickSource appSpec.updateInterval
@@ -89,7 +89,7 @@ update appSpec = case _ of
           _ <- H.liftEffect $ Window.requestAnimationFrame passRender window
           pure unit
 
-create :: forall state. CanvasApp GraphicsContext state -> H.Component HH.HTML (Const Void) Unit Void Aff
+create :: forall state. CanvasApp state -> H.Component HH.HTML (Const Void) Unit Void Aff
 create appSpec = do
   H.mkComponent
     { initialState: const $ Initializing appSpec.initialState
@@ -134,7 +134,7 @@ getInitializedState = do
       HS.put $ Initialized newState
       pure $ { changed: false, state: appState, context: ctx }
 
-mapState :: forall state. (state -> CanvasRuntime GraphicsContext (Maybe state)) -> AppM state Unit
+mapState :: forall state. (state -> CanvasRuntime (Maybe state)) -> AppM state Unit
 mapState f = do
   currentState <- getInitializedState
   Tuple state_ ctx_ <- H.liftEffect $ S.runStateT (f currentState.state) currentState.context
