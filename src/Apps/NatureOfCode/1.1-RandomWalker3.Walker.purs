@@ -2,7 +2,6 @@
 module Apps.NatureOfCode.Randomwalker3.Walker where
 
 import Prelude
-import Control.Monad.State.Trans as S
 import Graphics as G
 import Model.Vector (Vector2, randomVector, (|/|))
 import Toolkit (CanvasRuntime)
@@ -18,7 +17,7 @@ init canvasSize = canvasSize |/| 2.0
 -- | Updates the walker, performing a walk step.
 update :: Walker -> CanvasRuntime Walker
 update walker = do
-  diff <- S.lift randomVector
+  diff <- randomVector
   pure $ walker + diff
 
 -- | Renders the walker to the provided context.

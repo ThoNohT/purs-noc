@@ -1,4 +1,4 @@
-module App (create) where
+module Framework.App (create) where
 
 import Prelude
 import Control.Monad.State as HS

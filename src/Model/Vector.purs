@@ -2,9 +2,9 @@
 module Model.Vector where
 
 import Prelude
-import Effect (Effect)
-import Effect.Random as Random
 import Math as Math
+import Model.Random as Random
+import Types (GenericRuntime)
 
 -- | Defines all available operations on vectors.
 class
@@ -16,7 +16,7 @@ class
   -- | Return the dot product of the vector.
   dotProduct :: v -> v -> Number
   -- | Creates a random vector.
-  randomVector :: Effect v
+  randomVector :: GenericRuntime v
   -- | Scales a vector to the specified magnitude.
   setMagnitude :: Number -> v -> v
 

@@ -2,7 +2,6 @@
 module Apps.NatureOfCode.RandomVectors (app) where
 
 import Prelude
-import Control.Monad.State.Trans as S
 import Data.Maybe (Maybe(..))
 import Graphics as G
 import Model.Vector (Vector2, randomVector, (|*|), (|/|), (<=>))
@@ -23,7 +22,7 @@ initialize _ = do
 
 tick :: State -> CanvasRuntime (Maybe State)
 tick state = do
-  v <- S.lift randomVector
+  v <- randomVector
   pure $ Just $ v |*| 100.0
 
 render :: State -> CanvasRuntime Unit

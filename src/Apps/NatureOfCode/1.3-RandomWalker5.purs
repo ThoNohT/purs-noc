@@ -3,10 +3,9 @@
 module Apps.NatureOfCode.RandomWalker5 (app) where
 
 import Prelude
-import Control.Monad.State.Trans as S
 import Data.Maybe (Maybe(..))
-import Effect.Random as Random
 import Graphics as G
+import Model.Random as Random
 import Model.Vector (Vector2, randomVector, (<=>), (|*|), (|/|))
 import Toolkit (CanvasApp, CanvasRuntime, defaultApp)
 
@@ -19,8 +18,8 @@ canvasSize = 400.0 <=> 400.0
 initialize :: State -> CanvasRuntime (Maybe State)
 initialize state = do
   G.setCanvasSize canvasSize
-  velocity <- S.lift randomVector
-  mult <- S.lift $ Random.randomRange 0.0 3.0
+  velocity <- randomVector
+  mult <- Random.randomRange 0.0 3.0
   pure $ Just $ state { vel = velocity |*| mult }
 
 tick :: State -> CanvasRuntime (Maybe State)

@@ -2,7 +2,6 @@
 module Apps.NatureOfCode.RandomWalker2 (app) where
 
 import Prelude
-import Control.Monad.State.Trans as S
 import Data.Maybe (Maybe(..))
 import Graphics as G
 import Model.Vector (Vector2, randomVector, (<=>), (|/|))
@@ -22,7 +21,7 @@ initialize state = do
 
 tick :: State -> CanvasRuntime (Maybe State)
 tick state = do
-  diff <- S.lift randomVector
+  diff <- randomVector
   pure $ Just $ state + diff
 
 render :: State -> CanvasRuntime Unit

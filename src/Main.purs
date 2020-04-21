@@ -4,7 +4,7 @@ import Prelude
 import Effect (Effect)
 import Halogen.Aff as HA
 import Halogen.VDom.Driver (runUI)
-import App (create)
+import Framework.App (create)
 {-
     Import a specific app here as ActiveApp to run this app.
  -}
