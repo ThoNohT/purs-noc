@@ -13,6 +13,7 @@ module Graphics
   , scale
   , background
   , fillRect
+  , clearRect
   , makeContextForElement
   , circle
   , ellipse
@@ -29,13 +30,13 @@ import Model.Vector (Vector2, diagonal, getX, getY, (<=>))
 import Partial.Unsafe (unsafePartial)
 
 -- Recreate this type alias from Toolkit to prevent circular dependencies.
-type CanvasRuntime = S.StateT GraphicsContext Effect
+type CanvasRuntime
+  = S.StateT GraphicsContext Effect
 
 {- Context -}
 -- | The graphics context that all operations can be done with.
 data GraphicsContext
   = GraphicsContext GC.CanvasElement GC.Context2D
-
 
 -- | Makes a graphics context for the element with the specified identifier.
 makeContextForElement :: String -> Effect GraphicsContext
@@ -144,18 +145,25 @@ background style = do
   -- Setup canvas.
   resetTransform
   dimensions <- getCanvasSize
-  S.lift $ GC.setFillStyle (context ctx) style
+  setFillStyle style
   -- Fill.
+  clearRect zero dimensions
   fillRect zero dimensions
   -- Revert style/transform.
   setFillStyle oldFillStyle
   setTransform oldTransform
 
--- | Fills the specified area with the specified style.
+-- | Fills the specified area.
 fillRect :: Vector2 -> Vector2 -> CanvasRuntime Unit
 fillRect base size = do
   ctx <- S.get
   S.lift $ GC.fillRect (context ctx) { x: getX base, y: getY base, width: getX size, height: getY size }
+
+-- | Clears the specified area.
+clearRect :: Vector2 -> Vector2 -> CanvasRuntime Unit
+clearRect base size = do
+  ctx <- S.get
+  S.lift $ GC.clearRect (context ctx) { x: getX base, y: getY base, width: getX size, height: getY size }
 
 -- | Draws a circle at the specified location, with the specified size.
 ellipse :: Vector2 -> Vector2 -> CanvasRuntime Unit
