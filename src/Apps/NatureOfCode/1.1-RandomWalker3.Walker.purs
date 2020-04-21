@@ -2,9 +2,10 @@
 module Apps.NatureOfCode.Randomwalker3.Walker where
 
 import Prelude
-import Effect (Effect)
+import Control.Monad.State.Trans as S
 import Graphics as G
 import Model.Vector (Vector2, randomVector, (|/|))
+import Toolkit (CanvasRuntime)
 
 -- | The walker type, contains just an x, and a y coordinate.
 type Walker
@@ -15,13 +16,13 @@ init :: Vector2 -> Walker
 init canvasSize = canvasSize |/| 2.0
 
 -- | Updates the walker, performing a walk step.
-update :: Walker -> Effect Walker
+update :: Walker -> CanvasRuntime Walker
 update walker = do
-  diff <- randomVector
+  diff <- S.lift randomVector
   pure $ walker + diff
 
 -- | Renders the walker to the provided context.
-render :: G.GraphicsContext -> Walker -> Effect Unit
-render ctx walker = do
-  G.setFillStyle ctx "#FFFFFF64"
-  G.circle ctx walker 4.0
+render :: Walker -> CanvasRuntime Unit
+render walker = do
+  G.setFillStyle "#FFFFFF64"
+  G.circle walker 4.0

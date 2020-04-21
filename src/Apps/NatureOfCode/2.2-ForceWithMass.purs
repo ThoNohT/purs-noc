@@ -3,14 +3,13 @@ module Apps.NatureOfCode.ForceWithMass (app) where
 
 import Prelude
 import Data.List (List(..), (:))
-import App as App
 import Data.Maybe (Maybe(..))
 import Data.Traversable (sequence)
-import Effect (Effect)
 import Graphics as G
 import Math as Math
 import Model.Events (MouseData, MouseEvent(..))
 import Model.Vector (Vector2, getX, getY, setX, setY, (<=>), (|/|), (|*|))
+import Toolkit (CanvasApp, CanvasRuntime, defaultApp)
 
 type State
   = { movers :: List Mover, mouseIsDown :: Boolean }
@@ -21,8 +20,8 @@ type Mover
 canvasSize :: Vector2
 canvasSize = 400.0 <=> 400.0
 
-initialize :: G.GraphicsContext -> State -> Effect (Maybe State)
-initialize ctx state = G.setCanvasSize ctx canvasSize >>= const (pure Nothing)
+initialize :: State -> CanvasRuntime (Maybe State)
+initialize state = G.setCanvasSize canvasSize >>= const (pure Nothing)
 
 -- | Applies the a force to an accelleration vector.
 applyForce :: Vector2 -> Number -> Vector2 -> Vector2
@@ -65,7 +64,7 @@ updateMover gravity wind mover =
   in
     mover # applyAcc acc # applyVel # edges
 
-tick :: State -> Effect (Maybe State)
+tick :: State -> CanvasRuntime (Maybe State)
 tick state =
   let
     gravity = 0.0 <=> 1.6
@@ -74,34 +73,33 @@ tick state =
   in
     pure $ Just $ state { movers = map (updateMover gravity wind) state.movers }
 
-handleMouse :: MouseData -> State -> Effect (Maybe State)
+handleMouse :: MouseData -> State -> CanvasRuntime (Maybe State)
 handleMouse event state = case event.event of
   MouseDown -> pure $ Just state { mouseIsDown = true }
   MouseUp -> pure $ Just state { mouseIsDown = false }
   _ -> pure Nothing
 
-renderMover :: G.GraphicsContext -> Mover -> Effect Unit
-renderMover ctx mover = do
-  G.setFillStyle ctx "#FFFFFF64"
-  G.setStrokeStyle ctx "white"
-  G.setStrokeWidth ctx 2.0
-  G.circle ctx mover.pos mover.radius
+renderMover :: Mover -> CanvasRuntime Unit
+renderMover mover = do
+  G.setFillStyle "#FFFFFF64"
+  G.setStrokeStyle "white"
+  G.setStrokeWidth 2.0
+  G.circle mover.pos mover.radius
 
-render :: G.GraphicsContext -> State -> Effect Unit
-render ctx state = do
-  G.background ctx "black"
-  _ <- sequence $ map (renderMover ctx) state.movers
+render :: State -> CanvasRuntime Unit
+render state = do
+  G.background "black"
+  _ <- sequence $ map (renderMover) state.movers
   pure unit
 
-app :: App.CanvasApp
+app :: CanvasApp State
 app =
   let
     mover pos mass = { pos: pos, vel: zero, mass: mass, radius: 10.0 * Math.sqrt mass }
   in
-    App.app
-      $ (App.defaultAppSpec { movers: ((mover (100.0 <=> 50.0) 2.0) : (mover (300.0 <=> 50.0) 4.0) : Nil), mouseIsDown: false })
-          { initialize = initialize
-          , render = render
-          , tick = tick
-          , handleMouse = handleMouse
-          }
+    (defaultApp { movers: ((mover (100.0 <=> 50.0) 2.0) : (mover (300.0 <=> 50.0) 4.0) : Nil), mouseIsDown: false })
+      { initialize = initialize
+      , render = render
+      , tick = tick
+      , handleMouse = handleMouse
+      }

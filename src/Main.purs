@@ -8,7 +8,7 @@ import App (create)
 {-
     Import a specific app here as ActiveApp to run this app.
  -}
-import Apps.MouseDot as ActiveApp
+import Apps.NatureOfCode.ForceWithMass as ActiveApp
 
 main :: Effect Unit
 main =

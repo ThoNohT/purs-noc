@@ -2,12 +2,11 @@
 module Apps.NatureOfCode.ApplyForce (app) where
 
 import Prelude
-import App as App
 import Data.Maybe (Maybe(..))
-import Effect (Effect)
 import Graphics as G
 import Model.Events (MouseData, MouseEvent(..))
 import Model.Vector (Vector2, getX, getY, setX, setY, (<=>), (|/|))
+import Toolkit (CanvasApp, CanvasRuntime, defaultApp)
 
 type State
   = { mover :: Mover, mouseIsDown :: Boolean }
@@ -21,8 +20,8 @@ canvasSize = 400.0 <=> 400.0
 center :: Vector2
 center = canvasSize |/| 2.0
 
-initialize :: G.GraphicsContext -> State -> Effect (Maybe State)
-initialize ctx state = G.setCanvasSize ctx canvasSize >>= const (pure Nothing)
+initialize :: State -> CanvasRuntime (Maybe State)
+initialize state = G.setCanvasSize canvasSize >>= const (pure Nothing)
 
 -- | Applies the a force to an accelleration vector, given that all mass is 1.
 applyForce :: Vector2 -> Vector2 -> Vector2
@@ -65,7 +64,7 @@ updateMover mover gravity wind =
   in
     mover # applyAcc acc # applyVel # edges
 
-tick :: State -> Effect (Maybe State)
+tick :: State -> CanvasRuntime (Maybe State)
 tick state =
   let
     gravity = 0.0 <=> 1.6
@@ -74,26 +73,25 @@ tick state =
   in
     pure $ Just $ state { mover = updateMover state.mover gravity wind }
 
-handleMouse :: MouseData -> State -> Effect (Maybe State)
+handleMouse :: MouseData -> State -> CanvasRuntime (Maybe State)
 handleMouse event state = case event.event of
   MouseDown -> pure $ Just state { mouseIsDown = true }
   MouseUp -> pure $ Just state { mouseIsDown = false }
   _ -> pure Nothing
 
-render :: G.GraphicsContext -> State -> Effect Unit
-render ctx state = do
-  G.background ctx "black"
-  G.setFillStyle ctx "#FFFFFF64"
-  G.setStrokeStyle ctx "white"
-  G.setStrokeWidth ctx 2.0
-  G.circle ctx state.mover.pos 32.0
+render :: State -> CanvasRuntime Unit
+render state = do
+  G.background "black"
+  G.setFillStyle "#FFFFFF64"
+  G.setStrokeStyle "white"
+  G.setStrokeWidth 2.0
+  G.circle state.mover.pos 32.0
 
-app :: App.CanvasApp
+app :: CanvasApp State
 app =
-  App.app
-    $ (App.defaultAppSpec { mover: { pos: center, vel: zero }, mouseIsDown: false })
-        { initialize = initialize
-        , render = render
-        , tick = tick
-        , handleMouse = handleMouse
-        }
+  (defaultApp { mover: { pos: center, vel: zero }, mouseIsDown: false })
+    { initialize = initialize
+    , render = render
+    , tick = tick
+    , handleMouse = handleMouse
+    }
