@@ -3,12 +3,12 @@
 module Apps.NatureOfCode.RandomWalker1 (app) where
 
 import Prelude
-import App as App
+import Control.Monad.State.Trans as S
 import Data.Maybe (Maybe(..))
-import Effect (Effect)
 import Effect.Random as Random
 import Graphics as G
 import Model.Vector (Vector2, (<=>), (|/|))
+import Toolkit (CanvasApp, CanvasRuntime, defaultApp)
 
 type State
   = Vector2
@@ -16,15 +16,15 @@ type State
 canvasSize :: Vector2
 canvasSize = 400.0 <=> 400.0
 
-initialize :: G.GraphicsContext -> State -> Effect (Maybe State)
-initialize ctx state = do
-  G.setCanvasSize ctx canvasSize
-  G.background ctx "black"
+initialize :: State -> CanvasRuntime (Maybe State)
+initialize state = do
+  G.setCanvasSize canvasSize
+  G.background "black"
   pure Nothing
 
-tick :: State -> Effect (Maybe State)
+tick :: State -> CanvasRuntime (Maybe State)
 tick state = do
-  val <- Random.randomInt 0 3
+  val <- S.lift $ Random.randomInt 0 3
   let
     newState = case { val: val } of
       { val: 0 } -> state + (1.0 <=> 0.0)
@@ -33,16 +33,15 @@ tick state = do
       { val: _ } -> state - (0.0 <=> 1.0)
   pure $ Just newState
 
-render :: G.GraphicsContext -> State -> Effect Unit
-render ctx state = do
-  G.setFillStyle ctx "#FFFFFF64"
-  G.circle ctx state 4.0
+render :: State -> CanvasRuntime Unit
+render state = do
+  G.setFillStyle "#FFFFFF64"
+  G.circle state 4.0
 
-app :: App.CanvasApp
+app :: CanvasApp State
 app =
-  App.app
-    $ (App.defaultAppSpec (canvasSize |/| 2.0))
-        { initialize = initialize
-        , render = render
-        , tick = tick
-        }
+  (defaultApp (canvasSize |/| 2.0))
+    { initialize = initialize
+    , render = render
+    , tick = tick
+    }

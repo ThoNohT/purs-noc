@@ -4,12 +4,11 @@
 module Apps.NatureOfCode.RandomWalker3 (app) where
 
 import Prelude
-import App as App
 import Apps.NatureOfCode.Randomwalker3.Walker as Walker
 import Data.Maybe (Maybe(..))
-import Effect (Effect)
 import Graphics as G
 import Model.Vector (Vector2, (<=>))
+import Toolkit (CanvasApp, CanvasRuntime, defaultApp)
 
 type State
   = Walker.Walker
@@ -17,24 +16,23 @@ type State
 canvasSize :: Vector2
 canvasSize = 400.0 <=> 400.0
 
-initialize :: G.GraphicsContext -> State -> Effect (Maybe State)
-initialize ctx state = do
-  G.setCanvasSize ctx canvasSize
-  G.background ctx "black"
+initialize :: State -> CanvasRuntime (Maybe State)
+initialize state = do
+  G.setCanvasSize canvasSize
+  G.background "black"
   pure Nothing
 
-tick :: State -> Effect (Maybe State)
+tick :: State -> CanvasRuntime (Maybe State)
 tick state = do
   Just <$> Walker.update state
 
-render :: G.GraphicsContext -> State -> Effect Unit
-render ctx state = Walker.render ctx state
+render :: State -> CanvasRuntime Unit
+render state = Walker.render state
 
-app :: App.CanvasApp
+app :: CanvasApp State
 app =
-  App.app
-    $ (App.defaultAppSpec $ Walker.init canvasSize)
-        { initialize = initialize
-        , render = render
-        , tick = tick
-        }
+  (defaultApp $ Walker.init canvasSize)
+    { initialize = initialize
+    , render = render
+    , tick = tick
+    }

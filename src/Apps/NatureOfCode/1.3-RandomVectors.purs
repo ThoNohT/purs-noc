@@ -2,11 +2,11 @@
 module Apps.NatureOfCode.RandomVectors (app) where
 
 import Prelude
-import App as App
+import Control.Monad.State.Trans as S
 import Data.Maybe (Maybe(..))
-import Effect (Effect)
 import Graphics as G
 import Model.Vector (Vector2, randomVector, (|*|), (|/|), (<=>))
+import Toolkit (CanvasApp, CanvasRuntime, defaultApp)
 
 type State
   = Vector2
@@ -14,29 +14,28 @@ type State
 canvasSize :: Vector2
 canvasSize = 400.0 <=> 400.0
 
-initialize :: G.GraphicsContext -> State -> Effect (Maybe State)
-initialize ctx _ = do
-  G.setCanvasSize ctx canvasSize
-  G.background ctx "black"
-  G.translate ctx $ canvasSize |/| 2.0
+initialize :: State -> CanvasRuntime (Maybe State)
+initialize _ = do
+  G.setCanvasSize canvasSize
+  G.background "black"
+  G.translate $ canvasSize |/| 2.0
   pure Nothing
 
-tick :: State -> Effect (Maybe State)
+tick :: State -> CanvasRuntime (Maybe State)
 tick state = do
-  v <- randomVector
+  v <- S.lift randomVector
   pure $ Just $ v |*| 100.0
 
-render :: G.GraphicsContext -> State -> Effect Unit
-render ctx state = do
-  G.setStrokeStyle ctx "white"
-  G.setStrokeWidth ctx 4.0
-  G.line ctx zero state
+render :: State -> CanvasRuntime Unit
+render state = do
+  G.setStrokeStyle "white"
+  G.setStrokeWidth 4.0
+  G.line zero state
 
-app :: App.CanvasApp
+app :: CanvasApp State
 app =
-  App.app
-    $ (App.defaultAppSpec zero)
-        { initialize = initialize
-        , render = render
-        , tick = tick
-        }
+  (defaultApp zero)
+    { initialize = initialize
+    , render = render
+    , tick = tick
+    }
