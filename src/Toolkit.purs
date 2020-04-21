@@ -1,19 +1,25 @@
-module Toolkit (CanvasApp, defaultApp) where
+module Toolkit (CanvasApp, CanvasRuntime, defaultApp) where
 
 import Prelude
+
+import Control.Monad.State (StateT)
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
-import Model.Events (KeyData, MouseData)
 import Graphics (GraphicsContext)
+import Model.Events (KeyData, MouseData)
+
+-- | The runtime type that is used when performing actions in an application, like rendering or updating the
+-- | state.
+type CanvasRuntime = StateT GraphicsContext Effect
 
 -- | The specification of an app
 type CanvasApp state
   = { initialState :: state
-    , tick :: state -> Effect (Maybe state)
-    , handleKeyboard :: KeyData -> state -> Effect (Maybe state)
-    , handleMouse :: MouseData -> state -> Effect (Maybe state)
-    , initialize :: GraphicsContext -> state -> Effect (Maybe state)
-    , render :: GraphicsContext -> state -> Effect Unit
+    , tick :: state -> CanvasRuntime (Maybe state)
+    , handleKeyboard :: KeyData -> state -> CanvasRuntime (Maybe state)
+    , handleMouse :: MouseData -> state -> CanvasRuntime (Maybe state)
+    , initialize :: state -> CanvasRuntime (Maybe state)
+    , render :: state -> CanvasRuntime Unit
     , updateInterval :: Int
     }
 
@@ -25,8 +31,8 @@ defaultApp initialState =
   , tick: const $ pure Nothing
   , handleKeyboard: const2 $ pure Nothing
   , handleMouse: const2 $ pure Nothing
-  , render: const2 (pure unit)
-  , initialize: const2 (pure Nothing)
+  , render: const (pure unit)
+  , initialize: const (pure Nothing)
   , updateInterval: 33
   }
 
