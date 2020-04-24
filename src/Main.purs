@@ -8,7 +8,7 @@ import Framework.App (create)
 {-
     Import a specific app here as ActiveApp to run this app.
  -}
-import Apps.NatureOfCode.ForceWithMass as ActiveApp
+import Apps.NatureOfCode.Friction as ActiveApp
 
 main :: Effect Unit
 main =
