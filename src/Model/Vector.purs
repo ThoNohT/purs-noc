@@ -11,8 +11,8 @@ class
   (CommutativeRing v, Show v) <= Vector v where
   -- | Scales the vector.
   scale :: Number -> v -> v
-  -- | Returns the magnitude of the vector.
-  magnitude :: v -> Number
+  -- | Returns the magnitude of the vector squared
+  magSqr :: v -> Number
   -- | Return the dot product of the vector.
   dotProduct :: v -> v -> Number
   -- | Creates a random vector.
@@ -35,6 +35,10 @@ invScaleFlipped :: forall v. Vector v => v -> Number -> v
 invScaleFlipped v scale = scaleFlipped v (1.0 / scale)
 
 infixl 8 invScaleFlipped as |/|
+
+-- | Returns the magnitude of the vector.
+magnitude :: forall v. Vector v => v -> Number
+magnitude v = Math.sqrt $ magSqr v
 
 -- | Limits the magnitude of a vector.
 limit :: forall v. Vector v => Number -> v -> v
@@ -65,7 +69,7 @@ instance commutativeRingVector2 :: CommutativeRing Vector2
 instance vectorVector2 :: Vector Vector2 where
   scale s (x <=> y) = (x * s) <=> (y * s)
   dotProduct (a <=> b) (c <=> d) = (a * c) + (c * d)
-  magnitude (x <=> y) = Math.sqrt (Math.pow x 2.0 + Math.pow y 2.0)
+  magSqr (x <=> y) = Math.pow x 2.0 + Math.pow y 2.0
   randomVector = do
     x <- Random.randomRange (-1.0) 1.0
     y <- Random.randomRange (-1.0) 1.0
