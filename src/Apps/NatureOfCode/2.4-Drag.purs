@@ -10,7 +10,6 @@ import Math as Math
 import Model.Events (MouseData, MouseEvent(..))
 import Model.Random as Random
 import Model.Vector (Vector2, getX, getY, magSqr, normalize, scale, setMagnitude, setX, setY, (<=>), (|*|), (|/|))
-import Prelude as List
 import Toolkit (CanvasApp, CanvasRuntime, defaultApp)
 
 type State
@@ -31,7 +30,7 @@ initialize state =
   in
     do
       G.setCanvasSize canvasSize
-      movers <- sequence $ (1 .. 10) # List.map randomMover
+      movers <- sequence $ (1 .. 10) # map randomMover
       pure $ Just $ state { movers = movers }
 
 tick :: State -> CanvasRuntime (Maybe State)
