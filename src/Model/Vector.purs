@@ -4,7 +4,7 @@ module Model.Vector where
 import Prelude
 import Math as Math
 import Model.Random as Random
-import Types (GenericRuntime)
+import Framework.Types (GenericRuntime)
 
 -- | Defines all available operations on vectors.
 class

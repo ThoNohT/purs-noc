@@ -2,7 +2,7 @@ module Console (log, unsafeLog) where
 
 import Prelude
 import Effect.Class.Console as Console
-import Types (GenericRuntime, liftEffect)
+import Framework.Types (GenericRuntime, liftEffect)
 
 -- | Safe version of logging to the console that returns an effect.
 log :: forall a. Show a => a -> GenericRuntime Unit

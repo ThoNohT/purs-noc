@@ -1,4 +1,4 @@
-module Types where
+module Framework.Types where
 
 import Prelude
 import Control.Monad.State (class MonadTrans, StateT, lift)
