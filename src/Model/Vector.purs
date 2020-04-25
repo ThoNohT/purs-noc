@@ -15,6 +15,8 @@ class
   magSqr :: v -> Number
   -- | Return the dot product of the vector.
   dotProduct :: v -> v -> Number
+  -- | Return the determinant of the vector.
+  determinant :: v -> v -> Number
   -- | Creates a random vector.
   randomVector :: GenericRuntime v
   -- | Scales a vector to the specified magnitude.
@@ -68,7 +70,8 @@ instance commutativeRingVector2 :: CommutativeRing Vector2
 
 instance vectorVector2 :: Vector Vector2 where
   scale s (x <=> y) = (x * s) <=> (y * s)
-  dotProduct (a <=> b) (c <=> d) = (a * c) + (c * d)
+  dotProduct (a <=> b) (c <=> d) = (a * c) + (b * d)
+  determinant (a <=> b) (c <=> d) = (a * d) - (b * c)
   magSqr (x <=> y) = Math.pow x 2.0 + Math.pow y 2.0
   randomVector = do
     x <- Random.randomRange (-1.0) 1.0
