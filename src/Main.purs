@@ -8,7 +8,7 @@ import Framework.App (create)
 {-
     Import a specific app here as ActiveApp to run this app.
  -}
-import Apps.NatureOfCode.GravitationalAttraction as ActiveApp
+import Apps.Village.Village as ActiveApp
 
 main :: Effect Unit
 main =
