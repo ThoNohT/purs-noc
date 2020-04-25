@@ -147,7 +147,6 @@ background style = do
   dimensions <- getCanvasSize
   setFillStyle style
   -- Fill.
-  clearRect zero dimensions
   fillRect zero dimensions
   -- Revert style/transform.
   setFillStyle oldFillStyle
