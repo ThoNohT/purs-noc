@@ -2,10 +2,12 @@
 module Model.Vector where
 
 import Prelude
-import Math as Math
+import Math (atan2, cos, pow, sin, sqrt) as Math
+import Model.Math (radians, degrees) as Math
 import Model.Random as Random
 import Framework.Types (GenericRuntime)
 
+-------------------- Vector --------------------
 -- | Defines all available operations on vectors.
 class
   (CommutativeRing v, Show v) <= Vector v where
@@ -15,8 +17,6 @@ class
   magSqr :: v -> Number
   -- | Return the dot product of the vector.
   dotProduct :: v -> v -> Number
-  -- | Return the determinant of the vector.
-  determinant :: v -> v -> Number
   -- | Creates a random vector.
   randomVector :: GenericRuntime v
   -- | Scales a vector to the specified magnitude.
@@ -48,6 +48,7 @@ limit maxMag v = if magnitude v > maxMag then setMagnitude maxMag v else v
 
 infixl 8 dotProduct as <.>
 
+-------------------- Vector2 --------------------
 -- | A 2-dimensional vector, with an x, and a y component.
 data Vector2
   = Vector2 Number Number
@@ -71,7 +72,6 @@ instance commutativeRingVector2 :: CommutativeRing Vector2
 instance vectorVector2 :: Vector Vector2 where
   scale s (x <=> y) = (x * s) <=> (y * s)
   dotProduct (a <=> b) (c <=> d) = (a * c) + (b * d)
-  determinant (a <=> b) (c <=> d) = (a * d) - (b * c)
   magSqr (x <=> y) = Math.pow x 2.0 + Math.pow y 2.0
   randomVector = do
     x <- Random.randomRange (-1.0) 1.0
@@ -98,3 +98,23 @@ setY y (x <=> _) = x <=> y
 -- | Creates a 2-vector with the x and y components of the same value.
 diagonal :: Number -> Vector2
 diagonal dist = one |*| dist
+
+-- | Return the determinant of the matrix formed by 2 2d vectors.
+determinant :: Vector2 -> Vector2 -> Number
+determinant (a <=> b) (c <=> d) = (a * d) - (b * c)
+
+-- | Rotate a vector by a specified angle.
+rotate :: Number -> Vector2 -> Vector2
+rotate deg v =
+  let
+    x = getX v
+
+    y = getY v
+
+    rad = Math.radians deg
+  in
+    (x * Math.cos rad - y * Math.sin rad) <=> (x * Math.sin rad + y * Math.cos rad)
+
+-- | Return the angle between two vectors in angles, range -180.0 to 180.0.
+angle :: Vector2 -> Vector2 -> Number
+angle v1 v2 = Math.degrees $ Math.atan2 (determinant v1 v2) (dotProduct v1 v2)
