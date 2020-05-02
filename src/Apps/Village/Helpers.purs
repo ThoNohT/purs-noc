@@ -31,6 +31,6 @@ pick choices e = do
     aggregatedChoices = zipWith combine odds effects
   doFirst aggregatedChoices e
 
--- | Get the first element from an array, or 0 if it is empty.
-firstOrZero :: forall f. Foldable f => f Int -> Int
-firstOrZero = foldMap (Just >>> First) >>> unwrap >>> fromMaybe 0
+-- | Get the first element from a Foldable type, or zero if it is empty.
+firstOrZero :: forall f a. Foldable f => Semiring a => f a -> a
+firstOrZero = foldMap (Just >>> First) >>> unwrap >>> fromMaybe zero
