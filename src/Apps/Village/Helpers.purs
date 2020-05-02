@@ -1,23 +1,20 @@
 module Apps.Village.Helpers where
 
 import Prelude
-import Data.Array as Array
 import Data.Array ((:))
-import Data.Foldable (sum)
-import Data.Maybe (Maybe, fromJust, isJust)
+import Data.Array as Array
+import Data.Foldable (sum, foldMap)
+import Data.Maybe (Maybe, fromJust, fromMaybe)
+import Data.Maybe.First (First(..))
+import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect (Effect)
 import Effect.Random as R
 import Partial.Unsafe (unsafePartial)
 
 -- | Pick the first function that returns some, and execute it.
-doFirst :: forall a. Array (a -> Maybe (Unit -> Effect a)) -> a -> Effect a
-doFirst choices e = do
-  let
-    f = choices # Array.find (\x -> isJust $ x e) # unsafePartial fromJust
-
-    g = f e # unsafePartial fromJust
-  g unit
+doFirst :: forall a. Array (a -> Maybe (Effect a)) -> a -> Effect a
+doFirst choices e = choices # foldMap (First <<< (#) e) # unwrap # fromMaybe (pure e)
 
 -- | Pick a random function from the provided list and executed.
 -- | Functions are tupled with a likelyhood for them to be picked.

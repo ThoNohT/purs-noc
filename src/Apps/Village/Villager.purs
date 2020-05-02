@@ -69,10 +69,10 @@ pursueGoal g villager =
         ang = angle a.heading diff
       in
         if ang < -10.0 then
-          Just $ \_ -> pure $ a { action = Turning true }
+          Just $ pure $ a { action = Turning true }
         else
           if ang > 10.0 then
-            Just $ \_ -> pure $ a { action = Turning false }
+            Just $ pure $ a { action = Turning false }
           else
             Nothing
 
@@ -81,10 +81,10 @@ pursueGoal g villager =
         dist = magnitude (g - a.pos)
       in
         if dist > 10.0 then
-          Just $ \_ -> pure $ a { action = Walking }
+          Just $ pure $ a { action = Walking }
         else
           Nothing
 
-    finish = \a -> Just \_ -> pure (a { action = Standing, goal = Nothing })
+    finish = \a -> Just $ pure (a { action = Standing, goal = Nothing })
   in
     doFirst [ align, moveTowards, finish ] villager
