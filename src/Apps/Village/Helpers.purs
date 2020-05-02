@@ -3,7 +3,7 @@ module Apps.Village.Helpers where
 import Prelude
 import Data.Array ((:))
 import Data.Array as Array
-import Data.Foldable (sum, foldMap)
+import Data.Foldable (class Foldable, foldMap, sum)
 import Data.Maybe (Maybe, fromJust, fromMaybe)
 import Data.Maybe.First (First(..))
 import Data.Newtype (unwrap)
@@ -13,7 +13,7 @@ import Effect.Random as R
 import Partial.Unsafe (unsafePartial)
 
 -- | Pick the first function that returns some, and execute it.
-doFirst :: forall a. Array (a -> Maybe (Effect a)) -> a -> Effect a
+doFirst :: forall f a. Foldable f => f (a -> Maybe (Effect a)) -> a -> Effect a
 doFirst choices e = choices # foldMap (First <<< (#) e) # unwrap # fromMaybe (pure e)
 
 -- | Pick a random function from the provided list and executed.
