@@ -48,14 +48,14 @@ updateVillager world villager = case villager.goal of
 idle :: World -> Villager -> Effect Villager
 idle world villager =
   let
-    pickGoal v = do
+    pickGoal = do
       x <- R.randomRange 0.0 (getX world.size)
       y <- R.randomRange 0.0 (getY world.size)
-      pure (v { goal = Just $ x <=> y })
+      pure (villager { goal = Just $ x <=> y })
   in
     pick
       [ Tuple 1 pickGoal
-      , Tuple 9 (\v -> pure v)
+      , Tuple 9 (pure villager)
       ]
       villager
 
