@@ -1,13 +1,12 @@
 module Apps.Village.Helpers where
 
 import Prelude
-import Data.Array ((:))
-import Data.Array as Array
-import Data.Foldable (class Foldable, foldMap, sum)
-import Data.Maybe (Maybe, fromMaybe)
+import Data.Array (zipWith, (:))
+import Data.Foldable (class Foldable, foldMap, foldr, sum)
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Maybe.First (First(..))
 import Data.Newtype (unwrap)
-import Data.Tuple (Tuple(..), fst, snd)
+import Data.Tuple (Tuple, fst, snd)
 import Effect (Effect)
 import Effect.Random as R
 
@@ -21,17 +20,17 @@ pick :: forall a. Array (Tuple Int (Effect a)) -> a -> Effect a
 pick choices e = do
   let
     sumChoices = map fst choices # sum
-
-    aggregatedChoices =
-      Array.foldl
-        (\(Tuple acc total) (Tuple odds elem) -> Tuple (Tuple (total + odds) elem : acc) (total + odds))
-        (Tuple [] 0)
-        choices
   choice <- R.randomInt 1 sumChoices
-  aggregatedChoices
-    # fst
-    # Array.reverse
-    # Array.filter (\(Tuple oddSum _) -> oddSum >= choice)
-    # Array.head
-    # map snd
-    # fromMaybe (pure e)
+  let
+    effects = map snd choices
+
+    odds = map fst choices # foldr (\odd acc -> ((firstOrZero acc) + odd) : acc) []
+
+    combine odd eff = \_ -> if odd <= choice then Just eff else Nothing
+
+    aggregatedChoices = zipWith combine odds effects
+  doFirst aggregatedChoices e
+
+-- | Get the first element from an array, or 0 if it is empty.
+firstOrZero :: forall f. Foldable f => f Int -> Int
+firstOrZero = foldMap (Just >>> First) >>> unwrap >>> fromMaybe 0
