@@ -1,8 +1,8 @@
 module Apps.Village.Village (app) where
 
 import Prelude
-import Apps.Village.Villager (Villager, VillagerAction(..), renderVillager, tickVillager, updateVillager)
-import Apps.Village.World (World)
+import Apps.Village.Model (VillagerAction(..), World)
+import Apps.Village.World as World
 import Data.Int (rem) as Math
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
@@ -13,7 +13,7 @@ import Toolkit (CanvasApp, CanvasRuntime, defaultApp)
 
 -- | The state just contains the location of the mouse.
 type State
-  = { villager :: Villager, world :: World, tickCount :: Int }
+  = { world :: World, tickCount :: Int }
 
 -- | This value is used to set and get the canvas size everywhere else.
 canvasSize :: Vector2
@@ -29,8 +29,7 @@ initialize state = do
 -- | Renders a white background, and a red square around the mouse position.
 render :: State -> CanvasRuntime Unit
 render state = do
-  G.background "green"
-  renderVillager state.villager
+  World.render state.world
 
 tickOrUpdate :: State -> (Unit -> Effect State) -> (Unit -> Effect State) -> CanvasRuntime (Maybe State)
 tickOrUpdate state onUpdate onTick =
@@ -45,25 +44,27 @@ tick :: State -> CanvasRuntime (Maybe State)
 tick state =
   tickOrUpdate state
     ( \_ -> do
-        newVillager <- updateVillager state.world state.villager
-        pure $ state { villager = newVillager }
+        newWorld <- World.update state.world
+        pure $ state { world = newWorld }
     )
     ( \_ -> do
-        newVillager <- tickVillager state.villager
-        pure $ state { villager = newVillager }
+        newWorld <- World.tick state.world
+        pure $ state { world = newWorld }
     )
 
 -- | Define the main application.
 app :: CanvasApp State
 app =
   ( defaultApp
-      { villager:
-          { pos: (100.0 <=> 100.0)
-          , action: Standing
-          , heading: (1.0 <=> 0.0)
-          , goal: Nothing
+      { world:
+          { size: canvasSize
+          , villager:
+              { pos: (100.0 <=> 100.0)
+              , action: Standing
+              , heading: (1.0 <=> 0.0)
+              , goal: Nothing
+              }
           }
-      , world: { size: canvasSize }
       , tickCount: 0
       }
   )

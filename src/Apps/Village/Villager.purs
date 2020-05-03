@@ -1,8 +1,8 @@
-module Apps.Village.Villager (Villager, VillagerAction(..), renderVillager, tickVillager, updateVillager) where
+module Apps.Village.Villager (render, tick, update) where
 
 import Prelude
 import Apps.Village.Helpers (doFirst, pick)
-import Apps.Village.World (World)
+import Apps.Village.Model (Villager, VillagerAction(..), World)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
@@ -11,16 +11,8 @@ import Graphics as G
 import Model.Vector (Vector2, (|*|), rotate, getX, getY, angle, magnitude, (<=>))
 import Toolkit (CanvasRuntime)
 
-type Villager
-  = { pos :: Vector2, heading :: Vector2, action :: VillagerAction, goal :: Maybe Vector2 }
-
-data VillagerAction
-  = Standing
-  | Walking
-  | Turning Boolean
-
-renderVillager :: Villager -> CanvasRuntime Unit
-renderVillager villager = do
+render :: Villager -> CanvasRuntime Unit
+render villager = do
   G.setFillStyle "#CCCCCC"
   G.setStrokeStyle "white"
   G.setStrokeWidth 2.0
@@ -32,16 +24,16 @@ renderVillager villager = do
       G.setFillStyle "red"
       G.circle g 3.0
 
-tickVillager :: Villager -> Effect Villager
-tickVillager villager =
+tick :: Villager -> Effect Villager
+tick villager =
   pure
     $ case villager.action of
         Standing -> villager
         Walking -> villager { pos = villager.pos + villager.heading }
         Turning left -> villager { heading = rotate (if left then -1.0 else 1.0) villager.heading }
 
-updateVillager :: World -> Villager -> Effect Villager
-updateVillager world villager = case villager.goal of
+update :: World -> Villager -> Effect Villager
+update world villager = case villager.goal of
   Nothing -> idle world villager
   Just g -> pursueGoal g villager
 
