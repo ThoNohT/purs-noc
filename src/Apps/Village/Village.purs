@@ -1,7 +1,7 @@
 module Apps.Village.Village (app) where
 
 import Prelude
-import Apps.Village.Model (VillagerAction(..), World)
+import Apps.Village.Model (World)
 import Apps.Village.World as World
 import Data.Int (rem) as Math
 import Data.Maybe (Maybe(..))
@@ -55,19 +55,7 @@ tick state =
 -- | Define the main application.
 app :: CanvasApp State
 app =
-  ( defaultApp
-      { world:
-          { size: canvasSize
-          , villager:
-              { pos: (100.0 <=> 100.0)
-              , action: Standing
-              , heading: (1.0 <=> 0.0)
-              , goal: Nothing
-              }
-          }
-      , tickCount: 0
-      }
-  )
+  (defaultApp { world: World.init canvasSize, tickCount: 0 })
     { initialize = initialize
     , tick = tick
     , render = render

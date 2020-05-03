@@ -1,11 +1,13 @@
 module Apps.Village.Helpers where
 
 import Prelude
-import Data.Array (zipWith, (:))
+import Data.Array (zipWith, (:), filter)
 import Data.Foldable (class Foldable, foldMap, foldr, sum)
+import Data.Int (hexadecimal, toStringAs)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Maybe.First (First(..))
 import Data.Newtype (unwrap)
+import Data.String (length)
 import Data.Tuple (Tuple, fst, snd)
 import Effect (Effect)
 import Effect.Random as R
@@ -19,12 +21,14 @@ doFirst choices e = choices # foldMap (First <<< (#) e) # unwrap # fromMaybe (pu
 pick :: forall a. Array (Tuple Int (Effect a)) -> a -> Effect a
 pick choices e = do
   let
-    sumChoices = map fst choices # sum
+    allowedChoices = filter (fst >>> (<) 0) choices
+
+    sumChoices = map fst allowedChoices # sum
   choice <- R.randomInt 1 sumChoices
   let
-    effects = map snd choices
+    effects = map snd allowedChoices
 
-    odds = map fst choices # foldr (\odd acc -> ((firstOrZero acc) + odd) : acc) []
+    odds = map fst allowedChoices # foldr (\odd acc -> ((firstOrZero acc) + odd) : acc) []
 
     combine odd eff = \_ -> if odd <= choice then Just eff else Nothing
 
@@ -34,3 +38,15 @@ pick choices e = do
 -- | Get the first element from a Foldable type, or zero if it is empty.
 firstOrZero :: forall f a. Foldable f => Semiring a => f a -> a
 firstOrZero = foldMap (Just >>> First) >>> unwrap >>> fromMaybe zero
+
+-- | Converts an int integer to a hexadecimal string.
+toHex :: Int -> String
+toHex = toStringAs hexadecimal >>> padLeft 2 "0"
+
+-- | Pads a string to the left.
+padLeft :: Int -> String -> String -> String
+padLeft minSize filler str =
+  if length str >= minSize then
+    str
+  else
+    padLeft minSize filler (filler <> str)
